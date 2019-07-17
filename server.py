@@ -13,14 +13,12 @@ def index():
    return render_template('index.html')
 
 @app.route('/postText', methods=['POST'])
-def lower_conversion():
-   text = request.json['text']
-   if "ping" in text:
-       return_data = {"result":"pong"}
-       return jsonify(ResultSet=json.dumps(return_data))
-   lower_text = text.lower()
-   return_data = {"result":lower_text}
-   return jsonify(ResultSet=json.dumps(return_data))
+def receiveAnswer():
+   radioRes = []
+   for i in range(4):
+      radioRes.append(request.json['radio%d'%(i+1)])
+   print(radioRes)
+   #return jsonify(ResultSet=json.dumps(return_data))
 
 
 if __name__ == '__main__':

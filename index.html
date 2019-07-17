@@ -1,28 +1,31 @@
 <!DOCTYPE html>
 <html lang="ja">
- <head>
-   <meta charset="utf-8"></meta>
-   <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
-   <meta content="width=device-width, initial-scale=1" name="viewport"></meta>
-   <title>HelloFlask</title>
-   <!-- Bootstrap CDN -->
-   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+  <head>
+    <meta charset="utf-8"></meta>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+    <meta content="width=device-width, initial-scale=1" name="viewport"></meta>
+    <title>オンライン学習</title>
+    <!-- Bootstrap CDN -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 
-   <link rel="stylesheet" href="../static/css/sample.css">
- </head>
- <body>
-   <div class="container-fluid">
-     <div class="row">
-       <div class="col-sm-12">
-         <h1 class="text-center" id="hello">Hello Flask</h1>
-         <input type="text" class="form-control" id="input-text" placeholder="Please input text">
-         <button class="btn btn-default" id="button">Change text</button>
-       </div>
-     </div>
-   </div>
-   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-   <script src="../static/js/sample.js"></script>
- </body>
+    <link rel="stylesheet" href="../static/css/sample.css">
+  </head>
+  <body>
+    <h1 id="problem">問題文</h1>
+    <input type="radio" name="rad" value="1">選択1
+    <input type="radio" name="rad" value="2">選択2
+    <input type="radio" name="rad" value="3">選択3
+    <input type="radio" name="rad" value="4">選択4
+    <br>
+    <button id="ansButton">回答する</button>
+    <h2 id="RorW">正誤はここに表示される</h2>
+    <h2 id="Correct">正答はここに表示される</h2>
+    <button id="next">次の問題</button>
+    <br>
+    <h6 id="sessionID">ここにセッションID</h6>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="../static/js/sample.js"></script>
+  </body>
 </html>

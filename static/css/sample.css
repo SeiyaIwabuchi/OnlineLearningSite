@@ -1,7 +1,7 @@
 div.container-fluid {
-    text-align: center;
+    text-align: left;
   }
   
   #hello {
-    background-color: #F8F4E6;
+    background-color: rgb(255, 255, 255);
   }
