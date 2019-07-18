@@ -6,14 +6,14 @@ from flask import request, jsonify
 import json
 
 htmlSourcePath = "./index.html"
-probremsFilePath = "./probrems.json"
+problemsFilePath = "./problems.json"
 
 app = Flask(__name__,template_folder="./")
 #セッション
 sessions = [0]
 
 #問題データセット
-probrems = object()
+problems = object()
 
 #成績データ
 class RecordData():
@@ -36,20 +36,47 @@ class RecordData():
 
 #問題はjsonにする
 #問題データ読み込み
-def loadProbremsFromJson():
-   global probrems
-   with open(probremsFilePath,"r",encoding="utf-8_sig") as prob:
-      probrems = json.load(prob)
+def loadproblemsFromJson():
+   global problems
+   with open(problemsFilePath,"r",encoding="utf-8_sig") as prob:
+      problems = json.load(prob)
 
-#htmlに問題データを乗せる
-def problemWritingToHtml(probremNum):
-   pass
+#htmlに問題データを乗せる(最初だけ)
+def problemWritingToHtml(problemNum,htmlSource):
+   tmpDict = problems[problemNum]
+   print(tmpDict)
+   htmlSource = htmlSource.format(
+      problem = tmpDict["問題"],
+      choices1 = tmpDict["選択肢1"],
+      choices2 = tmpDict["選択肢2"],
+      choices3 = tmpDict["選択肢3"],
+      choices4 = tmpDict["選択肢4"],
+      RorW = "",
+      correct = "",
+      sessionID = str(sessions[len(sessions)-1]),
+      comment = ""
+      )
+   return htmlSource
+
+def raidoRes2Number(radioRes):
+   for index,b in enumerate(radioRes):
+      if b:
+         return index
+
+#
+def judgment(problemNum,choice):
+   if(int(problems[problemNum]["正答"]) == choice+1):
+      return True
+   else:
+      return False
 
 @app.route('/')
 def index():
    global sessions
    with open(htmlSourcePath,'r',encoding="utf-8_sig") as htso:
-      htmlSource = htso.read()%sessions[len(sessions)-1]
+      #htmlSource = htso.read().format(sessionID = int(sessions[len(sessions)-1]))
+      htmlSource = htso.read()
+      htmlSource = problemWritingToHtml(0,htmlSource)
       sessions.append(sessions[len(sessions)-1] + 1)
    return htmlSource
 
@@ -58,14 +85,21 @@ def receiveAnswer():
    radioRes = []
    for i in range(4):
       radioRes.append(request.json['radio%d'%(i+1)])
-   print("sessionID : " + request.json["sessionID"],end="")
-   print(radioRes)
-   #return jsonify(ResultSet=json.dumps(return_data))
+   print("sessionID : " + request.json["sessionID"],end=" ")
+   print("SelecedNumber : " + str(raidoRes2Number(radioRes)))
+   print("problemNumber : " + str(request.json["probNum"]))
+   return_data = {
+      "RorW":judgment(request.json["probNum"],raidoRes2Number(radioRes)),
+      "correct":problems[int(request.json["probNum"])]["正答"],
+      "comment":problems[int(request.json["probNum"])]["解説"]
+      }
+   return jsonify(ResultSet=json.dumps(return_data))
 
-def raidoRes2Number(radioRes):
-   for index,b in enumerate(radioRes):
-      if b:
-         return index
+#次の問題をクリックされた時のメソッド
+@app.route('/nextPoroblem', methods=['POST'])
+def nextPoroblem():
+   pass
 
 if __name__ == '__main__':
+   loadproblemsFromJson()
    app.run(host="127.0.0.1", port=8080)

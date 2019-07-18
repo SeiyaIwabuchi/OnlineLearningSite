@@ -12,18 +12,20 @@
     <link rel="stylesheet" href="../static/css/sample.css">
   </head>
   <body>
-    <h1 id="problem">問題文</h1>
-    <input type="radio" name="rad" value="1">選択1
-    <input type="radio" name="rad" value="2">選択2
-    <input type="radio" name="rad" value="3">選択3
-    <input type="radio" name="rad" value="4">選択4
+    <h1 id="problem">{problem}</h1>
+    <input type="radio" name="rad" value="1">{choices1}
+    <input type="radio" name="rad" value="2">{choices2}
+    <input type="radio" name="rad" value="3">{choices3}
+    <input type="radio" name="rad" value="4">{choices4}
     <br>
     <button id="ansButton">回答する</button>
-    <h2 id="RorW">正誤はここに表示される</h2>
-    <h2 id="Correct">正答はここに表示される</h2>
+    <h4 id="RorW">{RorW}</h3>
+    <h4 id="Correct">{correct}</h3>
+    <h3 id="解説">解説</h3>
+    <h4 id="Comment">{comment}</h3>
     <button id="next">次の問題</button>
     <br>
-    <h6 id="sessionID">%d</h6>
+    <h6 id="sessionID">{sessionID}</h6>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="../static/js/sample.js"></script>
