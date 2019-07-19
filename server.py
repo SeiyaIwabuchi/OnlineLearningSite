@@ -24,8 +24,10 @@ class RecordData():
    totalAnswers = 0
    correctAnswers = 0
    wrongAnswers = 0
+   correctNumber = []
+   wrongNumber = []
    def getStatistics(self):
-      data = [ 
+      data = [
          self.totalAnswers,
          self.correctAnswers,
          self.wrongAnswers,
@@ -33,8 +35,25 @@ class RecordData():
          self.wrongAnswers / self.totalAnswers
          ]
       return data
-   correctNumber = []
-   wrongNumber = []
+   #引数に指定された問題番号の正誤を返す
+   def getRorW(self,probNum):
+      cIdx = 0
+      wIdx = 0
+      res = []
+      for i in range(self.totalAnswers):
+         cProbNum = self.correctNumber[cIdx]
+         wProbNum = self.wrongNumber[wIdx]
+         if cProbNum < wProbNum:
+            res.append(True)
+            if cIdx < len(self.correctNumber)-1:
+               cIdx += 1
+         else:
+            res.append(False)
+            if wIdx < len(self.wrongNumber)-1:
+               wIdx += 1
+      return res[probNum]
+      
+      
 
 #jqueryでif文で必ず回答しないと送信できないようにする。  
 
@@ -87,6 +106,7 @@ def index():
 
 @app.route('/postText', methods=['POST'])
 def receiveAnswer():
+   #回答するを押したときの動作
    radioRes = []
    for i in range(4):
       radioRes.append(request.json['radio%d'%(i+1)])
@@ -98,14 +118,14 @@ def receiveAnswer():
    recordDict[request.json["sessionID"]].totalAnswers += 1
    if RorW:
       recordDict[request.json["sessionID"]].correctAnswers += 1
-      recordDict[request.json["sessionID"]].correctNumber.append(str(request.json["probNum"]))
+      recordDict[request.json["sessionID"]].correctNumber.append(int(request.json["probNum"]))
    else:
       recordDict[request.json["sessionID"]].wrongAnswers += 1
-      recordDict[request.json["sessionID"]].wrongNumber.append(str(request.json["probNum"]))
+      recordDict[request.json["sessionID"]].wrongNumber.append(int(request.json["probNum"]))
    
    return_data = {
       "RorW":RorW,
-      "correct":problems[int(request.json["probNum"])]["正答"],
+      "correct":problems[int(request.json["probNum"])]["選択肢" + problems[int(request.json["probNum"])]["正答"]],
       "comment":problems[int(request.json["probNum"])]["解説"]
       }
    return jsonify(ResultSet=json.dumps(return_data))
@@ -137,6 +157,8 @@ def nextPoroblem():
    finally:
       print(problemJson)
       return jsonify(ResultSet=json.dumps(problemJson))
+
+#結果表示用メソッド
 """
 data = [ 
          self.totalAnswers,
@@ -148,17 +170,34 @@ data = [
 """
 @app.route("/result/<sessionID>")
 def setResult(sessionID=None):
-   resultData = recordDict[sessionID].getStatistics()
-   with open(resultSourcePath,'r',encoding="utf-8_sig") as htso:
-      htmlSource = htso.read().format(
-         sID = sessionID,
-         probNum = resultData[0],
-         corrNum = resultData[1],
-         wrongNum = resultData[2],
-         corrRate = resultData[3],
-         wrongRate = resultData[4]
-         )
-   return htmlSource
+   try:
+      resultData = recordDict[sessionID].getStatistics()
+      resultHtmlTmp = "\
+      <tr>\n\
+         {trText}\n\
+      </tr>\
+      "
+      tdTagTmp = "<td>{rdText}</td>\n"
+      htmlResultTable = ""
+      print("SessionID : " + sessionID)
+      print(recordDict[sessionID].correctNumber)
+      print(recordDict[sessionID].wrongNumber)
+      for i in range(resultData[0]):
+         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = str(i+1)) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) else "×"))
+      with open(resultSourcePath,'r',encoding="utf-8_sig") as htso:
+         htmlSource = htso.read().format(
+            sID = sessionID,
+            probNum = resultData[0],
+            corrNum = resultData[1],
+            wrongNum = resultData[2],
+            corrRate = str(float(resultData[3])*100) + "%",
+            wrongRate = str(float(resultData[4])*100) + "%",
+            resultTable = resultHtmlTmp.format(trText = htmlResultTable)
+            )
+      return htmlSource
+   except KeyError:
+      ret = "<h1>指定されたページは存在しません</h1>"
+      return ret
 
 if __name__ == '__main__':
    loadproblemsFromJson()

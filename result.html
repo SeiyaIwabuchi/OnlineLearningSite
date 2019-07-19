@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 
-    <link rel="stylesheet" href="../static/css/sample.css">
+    <link rel="stylesheet" href="../static/css/result.css">
   </head>
   <body>
     <h1>結果</h1>
@@ -18,6 +18,13 @@
     <h3>誤答数 : {wrongNum}</h3>
     <h3>正答率 : {corrRate}</h3>
     <h3>誤答率 : {wrongRate}</h3>
+    <table>
+      <tr>
+        <td>問題</td>
+        <td>正誤</td>
+      </tr>
+      {resultTable}
+    </table>
     <h6>{sID}</h6>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
