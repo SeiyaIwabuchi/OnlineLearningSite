@@ -16,6 +16,9 @@ sessions = [0]
 #問題データセット
 problems = object()
 
+#成績リスト
+recordDict = {}
+
 #成績データ
 class RecordData():
    totalAnswers = 0
@@ -74,6 +77,7 @@ def judgment(problemNum,choice):
 @app.route('/')
 def index():
    global sessions
+   recordDict[str(sessions[len(sessions)-1])] = RecordData()
    with open(htmlSourcePath,'r',encoding="utf-8_sig") as htso:
       #htmlSource = htso.read().format(sessionID = int(sessions[len(sessions)-1]))
       htmlSource = htso.read()
@@ -87,10 +91,20 @@ def receiveAnswer():
    for i in range(4):
       radioRes.append(request.json['radio%d'%(i+1)])
    print("sessionID : " + request.json["sessionID"],end=" ")
-   print("SelecedNumber : " + str(raidoRes2Number(radioRes)))
+   print("SelecedNumber : " + str(raidoRes2Number(radioRes)),end="")
    print("problemNumber : " + str(request.json["probNum"]))
+
+   RorW = judgment(request.json["probNum"],raidoRes2Number(radioRes))
+   recordDict[request.json["sessionID"]].totalAnswers += 1
+   if RorW:
+      recordDict[request.json["sessionID"]].correctAnswers += 1
+      recordDict[request.json["sessionID"]].correctNumber.append(str(request.json["probNum"]))
+   else:
+      recordDict[request.json["sessionID"]].wrongAnswers += 1
+      recordDict[request.json["sessionID"]].wrongNumber.append(str(request.json["probNum"]))
+   
    return_data = {
-      "RorW":judgment(request.json["probNum"],raidoRes2Number(radioRes)),
+      "RorW":RorW,
       "correct":problems[int(request.json["probNum"])]["正答"],
       "comment":problems[int(request.json["probNum"])]["解説"]
       }
@@ -126,8 +140,14 @@ def nextPoroblem():
 
 @app.route("/result/<sessionID>")
 def setResult(sessionID=None):
+   resultData = recordDict[sessionID].getStatistics()
    with open(resultSourcePath,'r',encoding="utf-8_sig") as htso:
-      htmlSource = htso.read().format(sID = sessionID)
+      htmlSource = htso.read().format(
+         sID = sessionID,
+         probNum = ,
+         corrNum = ,
+         wrongNum = ,
+         )
    return htmlSource
 
 if __name__ == '__main__':
