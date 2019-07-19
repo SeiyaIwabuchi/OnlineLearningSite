@@ -100,15 +100,32 @@ def receiveAnswer():
 def nextPoroblem():
    #サーバー側では問題jsonの組み立てを行う
    probNum = request.json["requestProblem"]
-   problemJson = {
-      "problem":problems[probNum]["問題"],
-      "choice1":problems[probNum]["選択肢1"],
-      "choice2":problems[probNum]["選択肢2"],
-      "choice3":problems[probNum]["選択肢3"],
-      "choice4":problems[probNum]["選択肢4"]
-   }
-   print(problemJson)
-   return jsonify(ResultSet=json.dumps(problemJson))
+   try:
+      problemJson = {
+         "problem":problems[probNum]["問題"],
+         "choice1":problems[probNum]["選択肢1"],
+         "choice2":problems[probNum]["選択肢2"],
+         "choice3":problems[probNum]["選択肢3"],
+         "choice4":problems[probNum]["選択肢4"],
+         "finsh":"false"
+      }
+   except IndexError:
+      #次の問題がないときはIndexErrorとなる
+      problemJson = {
+         "problem":"",
+         "choice1":"",
+         "choice2":"",
+         "choice3":"",
+         "choice4":"",
+         "finsh":"true"
+      }
+   finally:
+      print(problemJson)
+      return jsonify(ResultSet=json.dumps(problemJson))
+
+@app.route("/result/<sessionID>")
+def setResult(sessionID=None):
+   pass
 
 if __name__ == '__main__':
    loadproblemsFromJson()

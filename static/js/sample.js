@@ -66,26 +66,31 @@ function init() {
       data:textData,
       contentType:'application/json',
       success:function(data) {
-        //ここで問題書き換えと隠すものは隠す
-        //表示するもの
-        $("#ansButton").show();
-        //隠すもの
-        $("#RorW").hide();
-        $("#Correct").hide();
-        $("#next").hide();
-        $("#Comment").hide();
-        $("#解説").hide();
-        //内容を書き換えるもの
-        //問題と選択肢はjsonで受け取ったものを使う
-        $("#problem").text(JSON.parse(data.ResultSet).problem);
-        $("#radio1Label").text(JSON.parse(data.ResultSet).choice1);
-        $("#radio2Label").text(JSON.parse(data.ResultSet).choice2);
-        $("#radio3Label").text(JSON.parse(data.ResultSet).choice3);
-        $("#radio4Label").text(JSON.parse(data.ResultSet).choice4);
-        $("#radio1").prop('checked', false);
-        $("#radio2").prop('checked', false);
-        $("#radio3").prop('checked', false);
-        $("#radio4").prop('checked', false);
+        if(JSON.parse(data.ResultSet).finsh == "false"){
+          //ここで問題書き換えと隠すものは隠す
+          //表示するもの
+          $("#ansButton").show();
+          //隠すもの
+          $("#RorW").hide();
+          $("#Correct").hide();
+          $("#next").hide();
+          $("#Comment").hide();
+          $("#解説").hide();
+          //内容を書き換えるもの
+          //問題と選択肢はjsonで受け取ったものを使う
+          $("#problem").text(JSON.parse(data.ResultSet).problem);
+          $("#radio1Label").text(JSON.parse(data.ResultSet).choice1);
+          $("#radio2Label").text(JSON.parse(data.ResultSet).choice2);
+          $("#radio3Label").text(JSON.parse(data.ResultSet).choice3);
+          $("#radio4Label").text(JSON.parse(data.ResultSet).choice4);
+          $("#radio1").prop('checked', false);
+          $("#radio2").prop('checked', false);
+          $("#radio3").prop('checked', false);
+          $("#radio4").prop('checked', false);
+          $("input:[name=rad]").attr("checked",false);
+        }else{
+          window.location.href = "/result/" + $("#sessionID").text();
+        }
       }
     });
   });
