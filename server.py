@@ -21,11 +21,12 @@ recordDict = {}
 
 #成績データ
 class RecordData():
-   totalAnswers = 0
-   correctAnswers = 0
-   wrongAnswers = 0
-   correctNumber = []
-   wrongNumber = []
+   def __init__(self):
+      self.totalAnswers = 0
+      self.correctAnswers = 0
+      self.wrongAnswers = 0
+      self.correctNumber = []
+      self.wrongNumber = []
    def getStatistics(self):
       data = [
          self.totalAnswers,
@@ -37,20 +38,36 @@ class RecordData():
       return data
    #引数に指定された問題番号の正誤を返す
    def getRorW(self,probNum):
-      cIdx = 0
-      wIdx = 0
+      cIdx = 0 if len(self.correctNumber) > 0 else -1
+      wIdx = 0 if len(self.wrongNumber) > 0 else -1
       res = []
-      for i in range(self.totalAnswers):
+      if cIdx != -1 and wIdx != -1:
          cProbNum = self.correctNumber[cIdx]
          wProbNum = self.wrongNumber[wIdx]
-         if cProbNum < wProbNum:
-            res.append(True)
-            if cIdx < len(self.correctNumber)-1:
-               cIdx += 1
-         else:
+         for i in range(self.totalAnswers):
+            if cProbNum < wProbNum:
+               print(cProbNum)
+               res.append(True)
+               if cIdx < len(self.correctNumber)-1:
+                  cIdx += 1
+                  cProbNum = self.correctNumber[cIdx]
+               else:
+                  cProbNum = self.totalAnswers
+            else:
+               print(wProbNum)
+               res.append(False)
+               if wIdx < len(self.wrongNumber)-1:
+                  wIdx += 1
+                  wProbNum = self.wrongNumber[wIdx]
+               else:
+                  wProbNum = self.totalAnswers
+      elif cIdx == -1:
+         for trash in self.wrongNumber:
             res.append(False)
-            if wIdx < len(self.wrongNumber)-1:
-               wIdx += 1
+      elif wIdx == -1:
+         for trash in self.correctNumber:
+            res.append(True)
+      print(res)
       return res[probNum]
       
       
@@ -183,7 +200,7 @@ def setResult(sessionID=None):
       print(recordDict[sessionID].correctNumber)
       print(recordDict[sessionID].wrongNumber)
       for i in range(resultData[0]):
-         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = str(i+1)) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) else "×"))
+         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = str(i+1)) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
       with open(resultSourcePath,'r',encoding="utf-8_sig") as htso:
          htmlSource = htso.read().format(
             sID = sessionID,
