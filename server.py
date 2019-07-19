@@ -6,6 +6,7 @@ from flask import request, jsonify
 import json
 
 htmlSourcePath = "./index.html"
+resultSourcePath = "./result.html"
 problemsFilePath = "./problems.json"
 
 app = Flask(__name__,template_folder="./")
@@ -125,7 +126,9 @@ def nextPoroblem():
 
 @app.route("/result/<sessionID>")
 def setResult(sessionID=None):
-   pass
+   with open(resultSourcePath,'r',encoding="utf-8_sig") as htso:
+      htmlSource = htso.read().format(sID = sessionID)
+   return htmlSource
 
 if __name__ == '__main__':
    loadproblemsFromJson()
