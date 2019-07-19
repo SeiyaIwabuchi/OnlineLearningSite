@@ -12,22 +12,36 @@
     <link rel="stylesheet" href="../static/css/sample.css">
   </head>
   <body>
-    <h1 id="problem">{problem}</h1>
-    <input type="radio" name="rad" value="1" id="radio1"><label id="radio1Label">{choices1}</label>
-    <input type="radio" name="rad" value="2" id="radio2"><label id="radio2Label">{choices2}</label>
-    <input type="radio" name="rad" value="3" id="radio3"><label id="radio3Label">{choices3}</label>
-    <input type="radio" name="rad" value="4" id="radio4"><label id="radio4Label">{choices4}</label>
-    <br>
-    <button id="ansButton">回答する</button>
-    <h4 id="RorW">{RorW}</h3>
-    <h4 id="Correct">{correct}</h3>
-    <h3 id="解説">解説</h3>
-    <h4 id="Comment">{comment}</h3>
-    <button id="next">次の問題</button>
-    <br>
-    <h6 id="sessionID">{sessionID}</h6>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <script src="../static/js/sample.js"></script>
+    <div id="wrapper">
+      <div id="header">
+          <img src="../static/images/オンライン学習ヘッダ.jpg"
+      </div>
+      <div id="main">
+        <div id="contents">
+          <h1 id="problem">{problem}</h1>
+          <input type="radio" name="rad" value="1" id="radio1"><label id="radio1Label">{choices1}</label>
+          <br>
+          <input type="radio" name="rad" value="2" id="radio2"><label id="radio2Label">{choices2}</label>
+          <br>
+          <input type="radio" name="rad" value="3" id="radio3"><label id="radio3Label">{choices3}</label>
+          <br>
+          <input type="radio" name="rad" value="4" id="radio4"><label id="radio4Label">{choices4}</label>
+          <br>
+          <button id="ansButton">回答する</button>
+          <h4 id="RorW">{RorW}</h3>
+          <h4 id="Correct">{correct}</h3>
+          <h3 id="解説">解説</h3>
+          <h4 id="Comment">{comment}</h3>
+          <button id="next">次の問題</button>
+          <br>
+        </div>
+      </div>
+      <div id="footer">
+        <h6 id="sessionID">{sessionID}</h6>
+      </div>
+    </div>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+      <script src="../static/js/sample.js"></script>
   </body>
 </html>
