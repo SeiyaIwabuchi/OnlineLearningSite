@@ -137,16 +137,26 @@ def nextPoroblem():
    finally:
       print(problemJson)
       return jsonify(ResultSet=json.dumps(problemJson))
-
+"""
+data = [ 
+         self.totalAnswers,
+         self.correctAnswers,
+         self.wrongAnswers,
+         self.correctAnswers / self.totalAnswers,
+         self.wrongAnswers / self.totalAnswers
+         ]
+"""
 @app.route("/result/<sessionID>")
 def setResult(sessionID=None):
    resultData = recordDict[sessionID].getStatistics()
    with open(resultSourcePath,'r',encoding="utf-8_sig") as htso:
       htmlSource = htso.read().format(
          sID = sessionID,
-         probNum = ,
-         corrNum = ,
-         wrongNum = ,
+         probNum = resultData[0],
+         corrNum = resultData[1],
+         wrongNum = resultData[2],
+         corrRate = resultData[3],
+         wrongRate = resultData[4]
          )
    return htmlSource
 
