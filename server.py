@@ -98,7 +98,17 @@ def receiveAnswer():
 #次の問題をクリックされた時のメソッド
 @app.route('/nextPoroblem', methods=['POST'])
 def nextPoroblem():
-   pass
+   #サーバー側では問題jsonの組み立てを行う
+   probNum = request.json["requestProblem"]
+   problemJson = {
+      "problem":problems[probNum]["問題"],
+      "choice1":problems[probNum]["選択肢1"],
+      "choice2":problems[probNum]["選択肢2"],
+      "choice3":problems[probNum]["選択肢3"],
+      "choice4":problems[probNum]["選択肢4"]
+   }
+   print(problemJson)
+   return jsonify(ResultSet=json.dumps(problemJson))
 
 if __name__ == '__main__':
    loadproblemsFromJson()

@@ -47,6 +47,7 @@ function init() {
           $("#RorW").text(RorWMsg);
           $("#Correct").text("正解 : " + JSON.parse(data.ResultSet).correct);
           $("#Comment").text(JSON.parse(data.ResultSet).comment);
+          $("#ansButton").hide();
         }
       });
     }else{
@@ -55,7 +56,6 @@ function init() {
     return false;
   });
   $("#next").click(function() {
-    alert("未実装ですぅぅ。");
     probNum = probNum + 1;
     var textData = JSON.stringify({
       "requestProblem":probNum
@@ -67,6 +67,25 @@ function init() {
       contentType:'application/json',
       success:function(data) {
         //ここで問題書き換えと隠すものは隠す
+        //表示するもの
+        $("#ansButton").show();
+        //隠すもの
+        $("#RorW").hide();
+        $("#Correct").hide();
+        $("#next").hide();
+        $("#Comment").hide();
+        $("#解説").hide();
+        //内容を書き換えるもの
+        //問題と選択肢はjsonで受け取ったものを使う
+        $("#problem").text(JSON.parse(data.ResultSet).problem);
+        $("#radio1Label").text(JSON.parse(data.ResultSet).choice1);
+        $("#radio2Label").text(JSON.parse(data.ResultSet).choice2);
+        $("#radio3Label").text(JSON.parse(data.ResultSet).choice3);
+        $("#radio4Label").text(JSON.parse(data.ResultSet).choice4);
+        $("#radio1").prop('checked', false);
+        $("#radio2").prop('checked', false);
+        $("#radio3").prop('checked', false);
+        $("#radio4").prop('checked', false);
       }
     });
   });
