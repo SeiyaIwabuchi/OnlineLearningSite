@@ -45,7 +45,7 @@ function init() {
             $("#解説").show();
           }
           $("#RorW").text(RorWMsg);
-          $("#Correct").text("正解 : " + JSON.parse(data.ResultSet).correct);
+          $("#Correct").text("正答 : " + JSON.parse(data.ResultSet).correct);
           $("#Comment").text(JSON.parse(data.ResultSet).comment);
           $("#ansButton").hide();
         }
