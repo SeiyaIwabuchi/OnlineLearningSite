@@ -82,6 +82,16 @@ def loadproblemsFromJson():
    with open(problemsFilePath,"r",encoding="utf-8_sig") as prob:
       problems = json.load(prob)
 
+#jsonデータのチェック
+def checkProblems():
+   for p in problems:
+      if not p["正答"].isnumeric():
+         raise ProblemError
+#上の独自例外
+class ProblemError(Exception):
+   def __init__(self):
+      print("JSONデータの正答欄に不備があります。正答欄には1~4の半角数字を入力できます。")
+
 #htmlに問題データを乗せる(最初だけ)
 def problemWritingToHtml(problemNum,htmlSource):
    tmpDict = problems[problemNum]
