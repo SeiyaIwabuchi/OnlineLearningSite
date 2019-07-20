@@ -1,10 +1,10 @@
-table {
+/*table {
 	border-collapse: collapse;
 }
 td {
 	border: solid 1px;
 	padding: 0.5em;
-}
+}*/
 * {
 	margin: 0;
 	padding: 0; /* 全てのプロパティの余白とパディングをリセットしています。*/
