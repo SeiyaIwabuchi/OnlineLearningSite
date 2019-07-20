@@ -47,7 +47,7 @@ class RecordData():
          wProbNum = self.wrongNumber[wIdx]
          for i in range(self.totalAnswers):
             if cProbNum < wProbNum:
-               print(cProbNum)
+               #print(cProbNum)
                res.append(True)
                if cIdx < len(self.correctNumber)-1:
                   cIdx += 1
@@ -55,7 +55,7 @@ class RecordData():
                else:
                   cProbNum = self.totalAnswers
             else:
-               print(wProbNum)
+               #print(wProbNum)
                res.append(False)
                if wIdx < len(self.wrongNumber)-1:
                   wIdx += 1
@@ -68,7 +68,7 @@ class RecordData():
       elif wIdx == -1:
          for trash in self.correctNumber:
             res.append(True)
-      print(res)
+      #print(res)
       return res[probNum]
       
       
@@ -95,7 +95,7 @@ class ProblemError(Exception):
 #htmlに問題データを乗せる(最初だけ)
 def problemWritingToHtml(problemNum,htmlSource):
    tmpDict = problems[problemNum]
-   print(tmpDict)
+   #print(tmpDict)
    htmlSource = htmlSource.format(
       problem = tmpDict["問題"],
       choices1 = tmpDict["選択肢1"],
@@ -138,9 +138,9 @@ def receiveAnswer():
    radioRes = []
    for i in range(4):
       radioRes.append(request.json['radio%d'%(i+1)])
-   print("sessionID : " + request.json["sessionID"],end=" ")
-   print("SelecedNumber : " + str(raidoRes2Number(radioRes)),end="")
-   print("problemNumber : " + str(request.json["probNum"]))
+   #print("sessionID : " + request.json["sessionID"],end=" ")
+   #print("SelecedNumber : " + str(raidoRes2Number(radioRes)),end="")
+   #print("problemNumber : " + str(request.json["probNum"]))
 
    RorW = judgment(request.json["probNum"],raidoRes2Number(radioRes))
    recordDict[request.json["sessionID"]].totalAnswers += 1
@@ -154,7 +154,7 @@ def receiveAnswer():
    return_data = {
       "RorW":RorW,
       "correct":problems[int(request.json["probNum"])]["選択肢" + problems[int(request.json["probNum"])]["正答"]],
-      "comment":problems[int(request.json["probNum"])]["解説"]
+      "comment":problems[int(request.json["probNum"])]["解説"] if problems[int(request.json["probNum"])]["解説"] != "" else "特になし"
       }
    return jsonify(ResultSet=json.dumps(return_data))
 
@@ -183,7 +183,7 @@ def nextPoroblem():
          "finsh":"true"
       }
    finally:
-      print(problemJson)
+      #print(problemJson)
       return jsonify(ResultSet=json.dumps(problemJson))
 
 #結果表示用メソッド
@@ -207,11 +207,11 @@ def setResult(sessionID=None):
       "
       tdTagTmp = "<td>{rdText}</td>\n"
       htmlResultTable = ""
-      print("SessionID : " + sessionID)
-      print(recordDict[sessionID].correctNumber)
-      print(recordDict[sessionID].wrongNumber)
+      #print("SessionID : " + sessionID)
+      #print(recordDict[sessionID].correctNumber)
+      #print(recordDict[sessionID].wrongNumber)
       for i in range(resultData[0]):
-         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = str(i+1)) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
+         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = problems[i]["問題"]) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
       with open(resultSourcePath,'r',encoding="utf-8_sig") as htso:
          htmlSource = htso.read().format(
             sID = sessionID,
@@ -227,6 +227,7 @@ def setResult(sessionID=None):
       ret = "<h1>指定されたページは存在しません</h1>"
       return ret
 
+#問題一覧表示用
 @app.route("/ProblemList.html")
 def getProblemList():
    resultHtmlTmp = "\
