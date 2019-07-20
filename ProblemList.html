@@ -17,29 +17,24 @@
           <img src="../static/images/オンライン学習ヘッダ.jpg"
       </div>
       <div id="main">
-        <div id="contents">
-          <h1>結果</h1>
-          <h3>問題数 : {probNum}</h3>
-          <h3>正答数 : {corrNum}</h3>
-          <h3>誤答数 : {wrongNum}</h3>
-          <h3>正答率 : {corrRate}</h3>
-          <h3>誤答率 : {wrongRate}</h3>
-          <table>
+      	<div id="contents">
+					<h1>問題一覧</h1>
+					<table>
             <tr>
+							<td>番号</td>
               <td>問題</td>
               <td>正誤</td>
             </tr>
             {resultTable}
           </table>
-          <input type="button" onclick="location.href='/ProblemList.html'" value="問題一覧を見る">
         </div>
       </div>
       <div id="footer">
-        <h6>{sID}</h6>
+        <h6 id="sessionID">問題表示用</h6>
       </div>
+    </div>
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
       <script src=""></script>
-    </div>
   </body>
 </html>

@@ -8,6 +8,7 @@ import json
 htmlSourcePath = "./index.html"
 resultSourcePath = "./result.html"
 problemsFilePath = "./problems.json"
+problemListHtmlSource = "./ProblemList.html"
 
 app = Flask(__name__,template_folder="./")
 #セッション
@@ -215,6 +216,27 @@ def setResult(sessionID=None):
    except KeyError:
       ret = "<h1>指定されたページは存在しません</h1>"
       return ret
+
+@app.route("/ProblemList.html")
+def getProblemList():
+   resultHtmlTmp = "\
+   <tr>\n\
+      {trText}\n\
+   </tr>\
+   "
+   tdTagTmp = "<td>{rdText}</td>\n"
+   htmlResultTable = ""
+   for p in problems:
+      htmlResultTable += resultHtmlTmp.format(trText = \
+         tdTagTmp.format(rdText = p["番号"])  + \
+         tdTagTmp.format(rdText = p["問題"])  + \
+         tdTagTmp.format(rdText = p["選択肢" + p["正答"]]) \
+      )
+   with open(problemListHtmlSource,'r',encoding="utf-8_sig") as htso:
+      htmlSource = htso.read().format(
+         resultTable = resultHtmlTmp.format(trText = htmlResultTable)
+         )
+   return htmlSource
 
 if __name__ == '__main__':
    loadproblemsFromJson()
