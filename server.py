@@ -234,6 +234,9 @@ def setResult(sessionID=None):
    except KeyError:
       ret = "<h1>指定されたページは存在しません</h1>"
       return ret
+   except ZeroDivisionError:
+      ret = "<h1>指定されたページは存在しません</h1>"
+      return ret
 
 #問題一覧表示用
 @app.route("/ProblemList.html")
