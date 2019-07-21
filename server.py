@@ -9,6 +9,7 @@ htmlSourcePath = "./index.html"
 resultSourcePath = "./result.html"
 problemsFilePath = "./problems.json"
 problemListHtmlSource = "./ProblemList.html"
+adminHtmlSource = "./admin.html"
 
 app = Flask(__name__,template_folder="./")
 #セッション
@@ -79,8 +80,15 @@ class RecordData():
 #問題データ読み込み
 def loadproblemsFromJson():
    global problems
-   with open(problemsFilePath,"r",encoding="utf-8_sig") as prob:
-      problems = json.load(prob)
+   try:
+      with open(problemsFilePath,"r",encoding="utf-8_sig") as prob:
+         problems = json.load(prob)
+      checkProblems()
+      print("問題に問題はありませんでした。")
+      return True,""
+   except ProblemError:
+      print("問題に問題がありました。")
+      return False,"JSONデータに不備があります。"
 
 #jsonデータのチェック
 def checkProblems():
@@ -249,6 +257,25 @@ def getProblemList():
          )
    return htmlSource
 
+#管理用画面表示
+@app.route("/admin.html/<passwd>")
+def getAdmin(passwd=None):
+   if (passwd == "nN49KOMDK"):
+      htmlSource = ""
+      with open(adminHtmlSource,'r',encoding="utf-8_sig") as htso:
+         htmlSource = htso.read()
+      return htmlSource
+   else:
+      return "認証に失敗しました。"
+
+#ファイルアップロードメソッド
+@app.route("/upProblem", methods=['POST'])
+def upProblem():
+   the_file = request.files['file_1']
+   the_file.save("./" + the_file.filename) #自動で上書きされる
+   resultB,msg = loadproblemsFromJson()
+   return the_file.filename + "がアップロードされ、問題の更新が" + "成功" if resultB else "失敗" + "しました。" + msg
+
 if __name__ == '__main__':
    loadproblemsFromJson()
-   app.run(threaded = True,host="0.0.0.0", port=80)
+   app.run(threaded = True,host="0.0.0.0", port=80,debug=True)
