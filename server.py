@@ -13,18 +13,24 @@ resultSourcePath = "./result.html"
 problemsFilePath = "./problems.json"
 problemListHtmlSource = "./ProblemList.html"
 adminHtmlSource = "./admin.html"
+logPath = "./log/{name}.log"
 
-scanInterval = 60
+scanInterval = 60 #秒指定
+liveLimit = 60 * 60 * 60 #秒指定
 
 app = Flask(__name__,template_folder="./")
-#セッション
-sessions = [0]
 
 #問題データセット
 problems = object()
 
-#成績リスト
+#成績辞書
 recordDict = {}
+
+#ログ用リスト
+logList = []
+
+#管理画面ログ格納用
+adminLog = ""
 
 #成績データ
 class RecordData():
@@ -108,7 +114,7 @@ class ProblemError(Exception):
       print("JSONデータの正答欄に不備があります。正答欄には1~4の半角数字を入力できます。")
 
 #htmlに問題データを乗せる(最初だけ)
-def problemWritingToHtml(problemNum,htmlSource):
+def problemWritingToHtml(problemNum,htmlSource,sessionID):
    tmpDict = problems[problemNum]
    #print(tmpDict)
    htmlSource = htmlSource.format(
@@ -119,7 +125,7 @@ def problemWritingToHtml(problemNum,htmlSource):
       choices4 = tmpDict["選択肢4"],
       RorW = "",
       correct = "",
-      sessionID = str(sessions[len(sessions)-1]),
+      sessionID = str(sessionID),
       comment = ""
       )
    return htmlSource
@@ -138,14 +144,14 @@ def judgment(problemNum,choice):
 
 @app.route('/')
 def index():
-   global sessions
-   recordDict[str(sessions[len(sessions)-1])] = RecordData()
-   recordDict[str(sessions[len(sessions)-1])].remoteIP = request.remote_addr
+   sessionID = searchForFree()
+   recordDict[str(sessionID)] = RecordData()
+   recordDict[str(sessionID)].remoteIP = request.remote_addr
+   logList.append(request.remote_addr)
    with open(htmlSourcePath,'r',encoding="utf-8_sig") as htso:
       #htmlSource = htso.read().format(sessionID = int(sessions[len(sessions)-1]))
       htmlSource = htso.read()
-      htmlSource = problemWritingToHtml(0,htmlSource)
-      sessions.append(sessions[len(sessions)-1] + 1)
+      htmlSource = problemWritingToHtml(0,htmlSource,sessionID)
    return htmlSource
 
 @app.route('/postText', methods=['POST'])
@@ -276,7 +282,7 @@ def getAdmin(passwd=None):
       htmlSource = ""
       with open(adminHtmlSource,'r',encoding="utf-8_sig") as htso:
          htmlSource = htso.read()
-      return htmlSource
+      return htmlSource.format(log=adminLog,sID = passwd)
    else:
       return "認証に失敗しました。"
 
@@ -288,20 +294,45 @@ def upProblem():
    resultB,msg = loadproblemsFromJson()
    return the_file.filename + "がアップロードされ、問題の更新が" + "成功" if resultB else "失敗" + "しました。" + msg
 
-#しばらく使われていないセッションを削除するメソッド
+#しばらく使われていないセッションを削除するメソッドその他定期処理
 def organize():
    global recordDict
+   global adminLog
    while True:
-      print("organize")
+      time.sleep(scanInterval)
+      print("organizeTask")
       for n,s in list(recordDict.items()):
-         if datetime.datetime.today() - s.lastAccessTime >= datetime.timedelta(minutes=1):
+         if datetime.datetime.today() - s.lastAccessTime >= datetime.timedelta(seconds=liveLimit):
             print(s.remoteIP + " is deleted.")
             recordDict.pop(n)
-      time.sleep(scanInterval)
+      #log保存タスク
+      print("saveLogTask")
+      #整理用辞書
+      tmpDict = dict()
+      #{IPアドレス:回数}の形式で保存したい
+      for ipAddr in logList:
+         if ipAddr in tmpDict:
+            tmpDict[ipAddr] += 1
+         else:
+            tmpDict[ipAddr] = 1
+      #保存用テキスト
+      logTextTmplt = "{ip} : {num}\n"
+      logText = ""
+      #テキスト組み立て
+      for ipAddr,tnum in list(tmpDict.items()):
+         logText += logTextTmplt.format(ip=ipAddr,num=tnum)
+      adminLog = logText
+      #保存
+      with open(logPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today())),mode="w") as l:
+         l.write(logText)
 
 #空きスペースを探してそこのキーを返す
 def searchForFree():
-   pass
+   rKeys = recordDict.keys()
+   genKey = 0
+   while str(genKey) in rKeys:
+      genKey += 1
+   return genKey
 
 if __name__ == '__main__':
    loadproblemsFromJson()
