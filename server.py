@@ -4,12 +4,17 @@
 from flask import Flask, render_template
 from flask import request, jsonify
 import json
+import threading
+import datetime
+import time
 
 htmlSourcePath = "./index.html"
 resultSourcePath = "./result.html"
 problemsFilePath = "./problems.json"
 problemListHtmlSource = "./ProblemList.html"
 adminHtmlSource = "./admin.html"
+
+scanInterval = 60
 
 app = Flask(__name__,template_folder="./")
 #セッション
@@ -29,6 +34,8 @@ class RecordData():
       self.wrongAnswers = 0
       self.correctNumber = []
       self.wrongNumber = []
+      self.lastAccessTime = datetime.datetime.today()
+      self.remoteIP = object()
    def getStatistics(self):
       data = [
          self.totalAnswers,
@@ -133,6 +140,7 @@ def judgment(problemNum,choice):
 def index():
    global sessions
    recordDict[str(sessions[len(sessions)-1])] = RecordData()
+   recordDict[str(sessions[len(sessions)-1])].remoteIP = request.remote_addr
    with open(htmlSourcePath,'r',encoding="utf-8_sig") as htso:
       #htmlSource = htso.read().format(sessionID = int(sessions[len(sessions)-1]))
       htmlSource = htso.read()
@@ -152,6 +160,7 @@ def receiveAnswer():
 
    RorW = judgment(request.json["probNum"],raidoRes2Number(radioRes))
    recordDict[request.json["sessionID"]].totalAnswers += 1
+   recordDict[request.json["sessionID"]].lastAccessTime = datetime.datetime.today()
    if RorW:
       recordDict[request.json["sessionID"]].correctAnswers += 1
       recordDict[request.json["sessionID"]].correctNumber.append(int(request.json["probNum"]))
@@ -279,6 +288,23 @@ def upProblem():
    resultB,msg = loadproblemsFromJson()
    return the_file.filename + "がアップロードされ、問題の更新が" + "成功" if resultB else "失敗" + "しました。" + msg
 
+#しばらく使われていないセッションを削除するメソッド
+def organize():
+   global recordDict
+   while True:
+      print("organize")
+      for n,s in list(recordDict.items()):
+         if datetime.datetime.today() - s.lastAccessTime >= datetime.timedelta(minutes=1):
+            print(s.remoteIP + " is deleted.")
+            recordDict.pop(n)
+      time.sleep(scanInterval)
+
+#空きスペースを探してそこのキーを返す
+def searchForFree():
+   pass
+
 if __name__ == '__main__':
    loadproblemsFromJson()
-   app.run(threaded = True,host="0.0.0.0", port=80,debug=True)
+   thread = threading.Thread(target=organize)
+   thread.start()
+   app.run(threaded = True,debug=True,host="0.0.0.0", port=80)
