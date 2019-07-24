@@ -8,11 +8,15 @@ import threading
 import datetime
 import time
 
+
+#HTML Source path
 htmlSourcePath = "./index.html"
 resultSourcePath = "./result.html"
 problemsFilePath = "./problems.json"
 problemListHtmlSource = "./ProblemList.html"
 adminHtmlSource = "./admin.html"
+loginFromHtmlPath = "./auth.html"
+
 logPath = "./log/{name}.log"
 
 scanInterval = 60 #秒指定
@@ -276,15 +280,12 @@ def getProblemList():
    return htmlSource
 
 #管理用画面表示
-@app.route("/admin.html/<passwd>")
-def getAdmin(passwd=None):
-   if (passwd == "nN49KOMDK"):
-      htmlSource = ""
-      with open(adminHtmlSource,'r',encoding="utf-8_sig") as htso:
-         htmlSource = htso.read()
-      return htmlSource.format(log=adminLog,sID = passwd)
-   else:
-      return "認証に失敗しました。"
+@app.route("/admin.html")
+def getAdmin():
+   htmlSource = ""
+   with open(adminHtmlSource,'r',encoding="utf-8_sig") as htso:
+      htmlSource = htso.read()
+   return htmlSource.format(log=adminLog)
 
 #ファイルアップロードメソッド
 @app.route("/upProblem", methods=['POST'])
@@ -293,6 +294,32 @@ def upProblem():
    the_file.save("./" + the_file.filename) #自動で上書きされる
    resultB,msg = loadproblemsFromJson()
    return the_file.filename + "がアップロードされ、問題の更新が" + "成功" if resultB else "失敗" + "しました。" + msg
+
+#ログイン認証画面
+@app.route("/login")
+def login():
+   htmlSource = ""
+   with open(loginFromHtmlPath,mode="r",encoding="utf-8_sig") as htso:
+      htmlSource = htso.read()
+   return htmlSource
+
+#ログイン認証処理
+@app.route("/auth",methods=['POST'])
+def auth():
+   loginID = "seiya"
+   passwd = "nN49KOMDK"
+   retJson = {}
+   print(request.json)
+   if request.json["loginID"] == loginID and request.json["pass"] == passwd:
+      print("ログイン成功")
+      retJson["Result"] = "True"
+      retJson["adminURL"] = "/admin.html"
+   else:
+      print("ログイン失敗")
+      retJson["Result"] = "False"
+      retJson["adminURL"] = ""
+   print(retJson)
+   return jsonify(ResultSet=json.dumps(retJson))
 
 #しばらく使われていないセッションを削除するメソッドその他定期処理
 def organize():

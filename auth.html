@@ -18,19 +18,21 @@
       </div>
       <div id="main">
         <div id="container-fluid">
-            <h1>管理用ページ</h1>
-            <form id="my_form">
-                <input type="file" name="file_1">
-                <button type="button" class="btn btn-default" id="btnUpLoad">アップロード</button>
-            </form>
-            <textarea rows="25" cols="90" disabled>{log}</textarea>
+          <h2>ログイン</h2>
+          <h3>ログインID</h3>
+          <input type="text" id="ID">
+          <h3>パスワード</h3>
+          <input type="text" id="passwd">
+          <br>
+          <input type="button" id="bt_login" value="ログイン">
         </div>
       </div>
       <div id="footer">
+        <h6>{sID}</h6>
       </div>
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-      <script src="../static/js/admin.js"></script>
+      <script src="../static/js/auth.js"></script>
     </div>
   </body>
 </html>
