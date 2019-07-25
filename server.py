@@ -19,8 +19,9 @@ adminHtmlSource = "./admin.html"
 loginFromHtmlPath = "./auth.html"
 
 logPath = "./log/{name}.log"
+loginLogPath = "./log/login_{name}.log"
 
-scanInterval = 60 #秒指定
+scanInterval = 60 #秒指定 定期処理タイマー
 liveLimit = 60 * 60 * 60 #秒指定
 
 app = Flask(__name__,template_folder="./")
@@ -33,6 +34,10 @@ recordDict = {}
 
 #ログ用リスト
 logList = []
+
+#ログインログ用辞書リスト
+loginLogList = []
+
 
 #管理画面ログ格納用
 adminLog = ""
@@ -103,8 +108,6 @@ class RecordData():
             res.append(True)
       #print(res)
       return res[probNum]
-      
-      
 
 #jqueryでif文で必ず回答しないと送信できないようにする。  
 
@@ -328,9 +331,15 @@ def login():
       htmlSource = htso.read().format(sID=str(sessionID))
    return htmlSource
 
+#ログインログ用辞書を返すメソッド
+def createLoginLogDict(date,IPaddr,loginID,passwd,available,hashedSerial):
+   return {"date":date,"IPaddr":IPaddr,"loginID":loginID,"passwd":passwd,"available":available,"hashedSerial":hashedSerial}
+
 #ログイン認証処理
 @app.route("/auth",methods=['POST'])
 def auth():
+   global serialNumber
+   global loginLogList
    loginID = "seiya"
    passwd = "nN49KOMDK"
    retJson = {}
@@ -340,18 +349,29 @@ def auth():
       retJson["Result"] = "True"
       loginSessionDict[request.json["sessionID"]].loginAvailability = True
       loginSessionDict[request.json["sessionID"]].hashedSerialNumber = hashlib.sha256(str(serialNumber).encode()).hexdigest()
+      serialNumber += 1
       retJson["adminURL"] = "/admin.html/" + loginSessionDict[request.json["sessionID"]].hashedSerialNumber
    else:
       print("ログイン失敗")
       retJson["Result"] = "False"
       retJson["adminURL"] = ""
    print(retJson)
+   loginLogList.append(createLoginLogDict(
+      datetime.datetime.now(),\
+      request.remote_addr,\
+      request.json["loginID"],\
+      request.json["pass"],\
+      False if retJson["Result"] == "False" else True,\
+      retJson["adminURL"][11:]\
+      ))
    return jsonify(ResultSet=json.dumps(retJson))
 
 #しばらく使われていないセッションを削除するメソッドその他定期処理
 def organize():
    global recordDict
    global adminLog
+   global loginLogList
+   global logList
    while True:
       time.sleep(scanInterval)
       print("organizeTask")
@@ -369,6 +389,8 @@ def organize():
             tmpDict[ipAddr] += 1
          else:
             tmpDict[ipAddr] = 1
+      #クリア
+      logList.clear()
       #保存用テキスト
       logTextTmplt = "{ip} : {num}\n"
       logText = ""
@@ -379,6 +401,24 @@ def organize():
       #保存
       with open(logPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today())),mode="w") as l:
          l.write(logText)
+      #ログイン試行ログの保存
+      #何時何分に誰（IP）がログインID＋パスワードでログインを試みたかを残しておく
+      loginLogFormat = "{date} : [{IPaddr}] ID={loginID}, PASS={passwd}, available={avl},hashedSerial={hsdSerl}"
+      #{"date":date,"IPaddr":IPaddr,"loginID":loginID,"passwd":passwd,"available":available,"hashedSerial":hashedSerial}
+      loginLogText = ""
+      for lll in loginLogList:
+         loginLogText += loginLogFormat.format(
+            date = lll["date"],
+            IPaddr = lll["IPaddr"],
+            loginID = lll["loginID"],
+            passwd = lll["passwd"],
+            avl = lll["available"],
+            hsdSerl = lll["hashedSerial"]
+         )
+      #クリア
+      loginLogList.clear()
+      with open(loginLogPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today())),mode="w") as l:
+         l.write(loginLogText)
 
 #空きスペースを探してそこのキーを返す
 def searchForFree(dic):
