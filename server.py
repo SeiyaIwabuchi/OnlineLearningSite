@@ -7,6 +7,7 @@ import json
 import threading
 import datetime
 import time
+import hashlib
 
 
 #HTML Source path
@@ -35,6 +36,20 @@ logList = []
 
 #管理画面ログ格納用
 adminLog = ""
+
+#ログインセッションリスト
+loginSessionDict = {}
+
+#連番生成用変数
+serialNumber = 0
+
+#ログインセッションデータセット
+class LoginDataSet():
+   def __init__(self,rmIP):
+      self.lastAccessTime = datetime.datetime.today()
+      self.loginAvailability = False
+      self.remoteIP = rmIP
+      self.hashedSerialNumber = ""
 
 #成績データ
 class RecordData():
@@ -148,7 +163,7 @@ def judgment(problemNum,choice):
 
 @app.route('/')
 def index():
-   sessionID = searchForFree()
+   sessionID = searchForFree(recordDict)
    recordDict[str(sessionID)] = RecordData()
    recordDict[str(sessionID)].remoteIP = request.remote_addr
    logList.append(request.remote_addr)
@@ -280,12 +295,19 @@ def getProblemList():
    return htmlSource
 
 #管理用画面表示
-@app.route("/admin.html")
-def getAdmin():
-   htmlSource = ""
-   with open(adminHtmlSource,'r',encoding="utf-8_sig") as htso:
-      htmlSource = htso.read()
-   return htmlSource.format(log=adminLog)
+@app.route("/admin.html/<hashedValue>")
+def getAdmin(hashedValue=None):
+   loginAvailability = False
+   for lsd in list(loginSessionDict.values()):
+      if lsd.hashedSerialNumber == hashedValue:
+         loginAvailability = True
+   if loginAvailability:
+      htmlSource = ""
+      with open(adminHtmlSource,'r',encoding="utf-8_sig") as htso:
+         htmlSource = htso.read()
+      return htmlSource.format(log=adminLog)
+   else:
+      return "<h1>認証エラー</h1>"
 
 #ファイルアップロードメソッド
 @app.route("/upProblem", methods=['POST'])
@@ -298,9 +320,12 @@ def upProblem():
 #ログイン認証画面
 @app.route("/login")
 def login():
+   sessionID = searchForFree(loginSessionDict)
+   loginSessionDict[str(sessionID)] = LoginDataSet(request.remote_addr)
+   logList.append(request.remote_addr) #ログイン試行なのか問題を解きに来ただけなのか区別する必要がある。
    htmlSource = ""
    with open(loginFromHtmlPath,mode="r",encoding="utf-8_sig") as htso:
-      htmlSource = htso.read()
+      htmlSource = htso.read().format(sID=str(sessionID))
    return htmlSource
 
 #ログイン認証処理
@@ -313,7 +338,9 @@ def auth():
    if request.json["loginID"] == loginID and request.json["pass"] == passwd:
       print("ログイン成功")
       retJson["Result"] = "True"
-      retJson["adminURL"] = "/admin.html"
+      loginSessionDict[request.json["sessionID"]].loginAvailability = True
+      loginSessionDict[request.json["sessionID"]].hashedSerialNumber = hashlib.sha256(str(serialNumber).encode()).hexdigest()
+      retJson["adminURL"] = "/admin.html/" + loginSessionDict[request.json["sessionID"]].hashedSerialNumber
    else:
       print("ログイン失敗")
       retJson["Result"] = "False"
@@ -354,8 +381,8 @@ def organize():
          l.write(logText)
 
 #空きスペースを探してそこのキーを返す
-def searchForFree():
-   rKeys = recordDict.keys()
+def searchForFree(dic):
+   rKeys = dic.keys()
    genKey = 0
    while str(genKey) in rKeys:
       genKey += 1

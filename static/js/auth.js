@@ -3,9 +3,10 @@ $(window).load(init());
 function init() {
   // ログイン認証
   $("#bt_login").click(function() {
-    var authData = JSON.stringify({ 
+    var authData = JSON.stringify({
         "loginID":$("#ID").val(),
-        "pass":$("#passwd").val()
+        "pass":$("#passwd").val(),
+        "sessionID":$("#sessionID").text()
       });
     $.ajax({
       type:'POST',
@@ -16,7 +17,7 @@ function init() {
         if(JSON.parse(data.ResultSet).Result == "True"){
           window.location.href = JSON.parse(data.ResultSet).adminURL;
         }else{
-          alert("ログインIDまたはパスワードが間違っています。")
+          alert("ログインIDまたはパスワードが間違っています。");
         }
       }});
   });
