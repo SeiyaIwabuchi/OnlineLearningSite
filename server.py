@@ -403,7 +403,7 @@ def organize():
          l.write(logText)
       #ログイン試行ログの保存
       #何時何分に誰（IP）がログインID＋パスワードでログインを試みたかを残しておく
-      loginLogFormat = "{date} : [{IPaddr}] ID={loginID}, PASS={passwd}, available={avl},hashedSerial={hsdSerl}"
+      loginLogFormat = "{date} : [{IPaddr}] ID={loginID}, PASS={passwd}, available={avl},hashedSerial={hsdSerl}\n"
       #{"date":date,"IPaddr":IPaddr,"loginID":loginID,"passwd":passwd,"available":available,"hashedSerial":hashedSerial}
       loginLogText = ""
       for lll in loginLogList:
