@@ -443,5 +443,13 @@ def searchForFree(dic):
 if __name__ == '__main__':
    loadproblemsFromJson()
    thread = threading.Thread(target=organize)
+   thread.daemon = True
    thread.start()
-   app.run(threaded = True,debug=True,host="0.0.0.0", port=80)
+   print("定期処理スタート")
+   try:
+      app.run(threaded = True,debug=True,host="0.0.0.0", port=80)
+   except KeyboardInterrupt:
+      print("サーバー終了中")
+      #ここに終了処理
+   finally:
+      print("サーバ終了")
