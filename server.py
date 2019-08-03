@@ -422,9 +422,15 @@ def organize():
       with open(loginLogPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today())),mode="w") as l:
          l.write(loginLogText)
 
+#ブラウザを閉じるときにアクセスURL辞書から削除する
 @app.route("/deleteAdminURL/<palmt>")
 def deleteAdminURL(palmt=None):
-   print(palmt)
+   hsn = str(palmt)
+   for lsd_key,lsd_value in list(loginSessionDict.items()):
+      if lsd_value.hashedSerialNumber == hsn:
+         loginSessionDict.pop(lsd_key)
+         print(palmt + " is deleted.")
+   return ""
 
 #空きスペースを探してそこのキーを返す
 def searchForFree(dic):
