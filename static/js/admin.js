@@ -20,4 +20,11 @@ function init() {
       alert("fail");
     });
   });
+  $(window).on("beforeunload", function(e) {
+    $.ajax({
+      url  : "/deleteAdminURL/" + $(location).attr('pathname').split("/")[2],
+      type : "GET",
+      async: false
+    });
+  });
 }

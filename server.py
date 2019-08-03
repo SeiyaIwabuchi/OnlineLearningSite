@@ -18,10 +18,12 @@ problemListHtmlSource = "./ProblemList.html"
 adminHtmlSource = "./admin.html"
 loginFromHtmlPath = "./auth.html"
 
+#log path
 logPath = "./log/{name}.log"
 loginLogPath = "./log/login_{name}.log"
 
-scanInterval = 60 #秒指定 定期処理タイマー
+#time
+scanInterval = 60 * 60 * 60 #秒指定 定期処理タイマー
 liveLimit = 60 * 60 * 60 #秒指定
 
 app = Flask(__name__,template_folder="./")
@@ -419,6 +421,10 @@ def organize():
       loginLogList.clear()
       with open(loginLogPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today())),mode="w") as l:
          l.write(loginLogText)
+
+@app.route("/deleteAdminURL/<palmt>")
+def deleteAdminURL(palmt=None):
+   print(palmt)
 
 #空きスペースを探してそこのキーを返す
 def searchForFree(dic):
