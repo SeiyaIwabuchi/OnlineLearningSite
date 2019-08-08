@@ -68,6 +68,7 @@ class RecordData():
       self.wrongNumber = []
       self.lastAccessTime = datetime.datetime.today()
       self.remoteIP = object()
+      self.answers = []
    def getStatistics(self):
       data = [
          self.totalAnswers,
@@ -159,7 +160,7 @@ def raidoRes2Number(radioRes):
       if b:
          return index
 
-#
+#回答時に呼び出される。正誤を返す。
 def judgment(problemNum,choice):
    if(int(problems[problemNum]["正答"]) == choice+1):
       return True
@@ -178,9 +179,9 @@ def index():
       htmlSource = problemWritingToHtml(0,htmlSource,sessionID)
    return htmlSource
 
+#回答するを押したときの動作
 @app.route('/postText', methods=['POST'])
 def receiveAnswer():
-   #回答するを押したときの動作
    radioRes = []
    for i in range(4):
       radioRes.append(request.json['radio%d'%(i+1)])
@@ -188,7 +189,8 @@ def receiveAnswer():
    #print("SelecedNumber : " + str(raidoRes2Number(radioRes)),end="")
    #print("problemNumber : " + str(request.json["probNum"]))
 
-   RorW = judgment(request.json["probNum"],raidoRes2Number(radioRes))
+   recordDict[request.json["sessionID"]].answers.append(raidoRes2Number(radioRes))
+   RorW = judgment(request.json["probNum"],recordDict[request.json["sessionID"]].answers[len(recordDict[request.json["sessionID"]].answers)-1])
    recordDict[request.json["sessionID"]].totalAnswers += 1
    recordDict[request.json["sessionID"]].lastAccessTime = datetime.datetime.today()
    if RorW:
@@ -197,7 +199,7 @@ def receiveAnswer():
    else:
       recordDict[request.json["sessionID"]].wrongAnswers += 1
       recordDict[request.json["sessionID"]].wrongNumber.append(int(request.json["probNum"]))
-   
+
    return_data = {
       "RorW":RorW,
       "correct":problems[int(request.json["probNum"])]["選択肢" + problems[int(request.json["probNum"])]["正答"]],
@@ -258,7 +260,7 @@ def setResult(sessionID=None):
       #print(recordDict[sessionID].correctNumber)
       #print(recordDict[sessionID].wrongNumber)
       for i in range(resultData[0]):
-         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = problems[i]["問題"]) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
+         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = problems[i]["問題"]) + tdTagTmp.format(rdText = ) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
       with open(resultSourcePath,'r',encoding="utf-8_sig") as htso:
          htmlSource = htso.read().format(
             sID = sessionID,
