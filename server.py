@@ -259,8 +259,8 @@ def setResult(sessionID=None):
       #print("SessionID : " + sessionID)
       #print(recordDict[sessionID].correctNumber)
       #print(recordDict[sessionID].wrongNumber)
-      for i in range(resultData[0]):
-         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = problems[i]["問題"]) + tdTagTmp.format(rdText = ) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
+      for i in range(resultData[0]): #resultData[0]は回答した問題数。
+         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = problems[i]["問題"]) + tdTagTmp.format(rdText = problems[i]["選択肢" + str(recordDict[sessionID].answers[i]+1)]) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
       with open(resultSourcePath,'r',encoding="utf-8_sig") as htso:
          htmlSource = htso.read().format(
             sID = sessionID,
