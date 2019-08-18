@@ -9,6 +9,17 @@ import datetime
 import time
 import hashlib
 
+#URL
+URL_root = "/"
+URL_answerRequest = URL_root + "postText"
+URL_nextProblem = URL_root + "nextPoroblem"
+URL_result = URL_root + "result/<sessionID>"
+URL_ProblemList = URL_root + "ProblemList.html"
+URL_admin = URL_root + "admin.html/<hashedValue>"
+URL_upProblem = URL_root + "upProblem"
+URL_login = URL_root + "login"
+URL_auth = URL_root + "auth"
+URL_deleteAdminURL = URL_root + "deleteAdminURL/<palmt>"
 
 #HTML Source path
 htmlSourcePath = "./index.html"
@@ -167,7 +178,7 @@ def judgment(problemNum,choice):
    else:
       return False
 
-@app.route('/')
+@app.route(URL_root)
 def index():
    sessionID = searchForFree(recordDict)
    recordDict[str(sessionID)] = RecordData()
@@ -180,7 +191,7 @@ def index():
    return htmlSource
 
 #回答するを押したときの動作
-@app.route('/postText', methods=['POST'])
+@app.route(URL_answerRequest, methods=['POST'])
 def receiveAnswer():
    radioRes = []
    for i in range(4):
@@ -208,7 +219,7 @@ def receiveAnswer():
    return jsonify(ResultSet=json.dumps(return_data))
 
 #次の問題をクリックされた時のメソッド
-@app.route('/nextPoroblem', methods=['POST'])
+@app.route(URL_nextProblem, methods=['POST'])
 def nextPoroblem():
    #サーバー側では問題jsonの組み立てを行う
    probNum = request.json["requestProblem"]
@@ -245,7 +256,7 @@ data = [
          self.wrongAnswers / self.totalAnswers
          ]
 """
-@app.route("/result/<sessionID>")
+@app.route(URL_result)
 def setResult(sessionID=None):
    try:
       resultData = recordDict[sessionID].getStatistics()
@@ -280,7 +291,7 @@ def setResult(sessionID=None):
       return ret
 
 #問題一覧表示用
-@app.route("/ProblemList.html")
+@app.route(URL_ProblemList)
 def getProblemList():
    resultHtmlTmp = "\
    <tr>\n\
@@ -302,7 +313,7 @@ def getProblemList():
    return htmlSource
 
 #管理用画面表示
-@app.route("/admin.html/<hashedValue>")
+@app.route(URL_admin)
 def getAdmin(hashedValue=None):
    loginAvailability = False
    for lsd in list(loginSessionDict.values()):
@@ -317,7 +328,7 @@ def getAdmin(hashedValue=None):
       return "<h1>認証エラー</h1>"
 
 #ファイルアップロードメソッド
-@app.route("/upProblem", methods=['POST'])
+@app.route(URL_upProblem, methods=['POST'])
 def upProblem():
    the_file = request.files['file_1']
    the_file.save("./" + the_file.filename) #自動で上書きされる
@@ -325,7 +336,7 @@ def upProblem():
    return the_file.filename + "がアップロードされ、問題の更新が" + "成功" if resultB else "失敗" + "しました。" + msg
 
 #ログイン認証画面
-@app.route("/login")
+@app.route(URL_login)
 def login():
    sessionID = searchForFree(loginSessionDict)
    loginSessionDict[str(sessionID)] = LoginDataSet(request.remote_addr)
@@ -340,7 +351,7 @@ def createLoginLogDict(date,IPaddr,loginID,passwd,available,hashedSerial):
    return {"date":date,"IPaddr":IPaddr,"loginID":loginID,"passwd":passwd,"available":available,"hashedSerial":hashedSerial}
 
 #ログイン認証処理
-@app.route("/auth",methods=['POST'])
+@app.route(URL_auth,methods=['POST'])
 def auth():
    global serialNumber
    global loginLogList
@@ -425,7 +436,7 @@ def organize():
          l.write(loginLogText)
 
 #ブラウザを閉じるときにアクセスURL辞書から削除する
-@app.route("/deleteAdminURL/<palmt>")
+@app.route(URL_deleteAdminURL)
 def deleteAdminURL(palmt=None):
    hsn = str(palmt)
    for lsd_key,lsd_value in list(loginSessionDict.items()):
