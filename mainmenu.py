@@ -20,7 +20,7 @@ mainMenuHtmlPath = "./mainmanu.html"
 logPath = "./log/mainMenu_{name}.log"
 
 #教科辞書
-subjectList = {"":"","Linux":"localhost:81","セキュリティ":"localhost:82"}
+subjectList = {"Linux":"localhost:81","セキュリティ":"localhost:82"}
 
 #time
 scanInterval = 60 * 60 * 60 #秒指定 定期処理タイマー
@@ -127,7 +127,7 @@ def organize():
         with open(logPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today())),mode="w") as l:
             l.write(logText)
 
-subjectListTemp = """<option value="{URL}">{subName}</option>"""
+subjectListTemp = """\t<button onclick="location.href='{URL}'" class="btn btn-default">{subName}</button>"""
 
 #メインメニュー表示メソッド
 @app.route(URL_mainMenu)
@@ -138,9 +138,9 @@ def getMainMenu():
     logList.append(request.remote_addr)
     subjectListHtml = ""
     for subName,subURL in subjectList.items():
-        subjectListHtml += subjectListTemp.format(URL=subURL,subName=subName) + "\n"
+        subjectListHtml += subjectListTemp.format(URL="http://" + subURL,subName=subName) + "\n"
     with open(mainMenuHtmlPath,'r',encoding="utf-8_sig") as htso:
-        htmlSource = htso.read().format(subList=subjectListHtml)
+        htmlSource = htso.read().format(buttons=subjectListHtml)
     return htmlSource
 
 #空きスペースを探してそこのキーを返す
