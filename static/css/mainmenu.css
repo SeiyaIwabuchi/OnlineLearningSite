@@ -1,0 +1,32 @@
+* {
+  margin: 0;
+  padding: 0; /* 全てのプロパティの余白とパディングをリセットしています。*/
+}
+#wrapper {
+  width: 700px;
+  margin: 0 auto;/* 幅固定（700px）でセンタリングします。*/
+}
+#header {
+  width: 700px;
+  height: 50px;  /* サイトロゴの高さに合わせて調節して下さい。*/
+}
+#main {
+  width: 700px;     /* メニューとコンテンツを囲んでいます。 */
+  overflow: hidden; /* 親ボックスでフロート解除します。*/
+}
+#menu {
+  float: right;
+  width: 150px;     /* floatの width 指定は必須です。*/
+}
+#contents {
+  float: right;
+  width: 550px;     /* floatの width 指定は必須です。*/
+}
+#footer {
+  clear: both;      /* IE6 以前の float 解除対応です。 */
+  width: 700px;
+  height: 50px;
+}
+#menu ul {
+  list-style: none;
+}

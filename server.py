@@ -20,6 +20,7 @@ URL_upProblem = URL_root + "upProblem"
 URL_login = URL_root + "login"
 URL_auth = URL_root + "auth"
 URL_deleteAdminURL = URL_root + "deleteAdminURL/<palmt>"
+URL_mainMenu = URL_root + "mainmenu"
 
 #HTML Source path
 htmlSourcePath = "./index.html"
@@ -28,6 +29,7 @@ problemsFilePath = "./problems.json"
 problemListHtmlSource = "./ProblemList.html"
 adminHtmlSource = "./admin.html"
 loginFromHtmlPath = "./auth.html"
+mainMenuHtmlPath = "./mainmanu.html"
 
 #log path
 logPath = "./log/{name}.log"
@@ -452,6 +454,13 @@ def searchForFree(dic):
    while str(genKey) in rKeys:
       genKey += 1
    return genKey
+
+#メインメニュー表示メソッド
+@app.route(URL_mainMenu)
+def getMainMenu():
+   with open(mainMenuHtmlPath,'r',encoding="utf-8_sig") as htso:
+      htmlSource = htso.read()
+   return htmlSource
 
 if __name__ == '__main__':
    loadproblemsFromJson()
