@@ -10,62 +10,6 @@ import time
 import hashlib
 import sys
 
-#URL
-URL_root = "/"
-URL_answerRequest = URL_root + "postText"
-URL_nextProblem = URL_root + "nextPoroblem"
-URL_result = URL_root + "result/<sessionID>"
-URL_ProblemList = URL_root + "ProblemList.html"
-URL_admin = URL_root + "admin.html/<hashedValue>"
-URL_upProblem = URL_root + "upProblem"
-URL_login = URL_root + "login"
-URL_auth = URL_root + "auth"
-URL_deleteAdminURL = URL_root + "deleteAdminURL/<palmt>"
-URL_mainMenu = URL_root + "mainmenu"
-
-#HTML Source path
-htmlSourcePath = "./index.html"
-resultSourcePath = "./result.html"
-problemListHtmlSource = "./ProblemList.html"
-adminHtmlSource = "./admin.html"
-loginFromHtmlPath = "./auth.html"
-mainMenuHtmlPath = "./mainmanu.html"
-
-#問題jsonパス
-problemsFilePath = "./problems_{subjectName}.json"
-
-#log path
-logPath = "./log/{name}.log"
-loginLogPath = "./log/login_{name}.log"
-
-#time
-scanInterval = 60 * 60 * 60 #秒指定 定期処理タイマー
-liveLimit = 60 * 60 * 60 #秒指定
-
-app = Flask(__name__,template_folder="./")
-
-#問題データセット
-problems = object()
-
-#成績辞書
-recordDict = {}
-
-#ログ用リスト
-logList = []
-
-#ログインログ用辞書リスト
-loginLogList = []
-
-
-#管理画面ログ格納用
-adminLog = ""
-
-#ログインセッションリスト
-loginSessionDict = {}
-
-#連番生成用変数
-serialNumber = 0
-
 #ログインセッションデータセット
 class LoginDataSet():
    def __init__(self,rmIP):
@@ -127,6 +71,63 @@ class RecordData():
             res.append(True)
       #print(res)
       return res[probNum]
+
+
+#URL
+URL_root = "/"
+URL_answerRequest = URL_root + "postText"
+URL_nextProblem = URL_root + "nextPoroblem"
+URL_result = URL_root + "result/<sessionID>"
+URL_ProblemList = URL_root + "ProblemList.html"
+URL_admin = URL_root + "admin.html/<hashedValue>"
+URL_upProblem = URL_root + "upProblem"
+URL_login = URL_root + "login"
+URL_auth = URL_root + "auth"
+URL_deleteAdminURL = URL_root + "deleteAdminURL/<palmt>"
+URL_mainMenu = URL_root + "mainmenu"
+
+#HTML Source path
+htmlSourcePath = "./index.html"
+resultSourcePath = "./result.html"
+problemListHtmlSource = "./ProblemList.html"
+adminHtmlSource = "./admin.html"
+loginFromHtmlPath = "./auth.html"
+mainMenuHtmlPath = "./mainmanu.html"
+
+#問題jsonパス
+problemsFilePath = "./problems_{subjectName}.json"
+
+#log path
+logPath = "./log/{name}.log"
+loginLogPath = "./log/login_{name}.log"
+
+#time
+scanInterval = 60 * 60 * 60 #秒指定 定期処理タイマー
+liveLimit = 60 * 60 * 60 #秒指定
+
+app = Flask(__name__,template_folder="./")
+
+#問題データセット
+problems = object()
+
+#成績辞書
+recordDict = {}
+
+#ログ用リスト
+logList = []
+
+#ログインログ用辞書リスト
+loginLogList = []
+
+
+#管理画面ログ格納用
+adminLog = ""
+
+#ログインセッションリスト
+loginSessionDict = {}
+
+#連番生成用変数
+serialNumber = 0
 
 #jqueryでif文で必ず回答しないと送信できないようにする。  
 
