@@ -8,6 +8,7 @@ import threading
 import datetime
 import time
 import hashlib
+import server
 
 #URL
 URL_root = "/"
@@ -16,12 +17,23 @@ URL_mainMenu = URL_root + "mainmenu"
 #HTML Source path
 mainMenuHtmlPath = "./mainmanu.html"
 
+#json path
+subjectListJsonPath = "./subjectList.json"
+
 #log path
 logPath = "./log/mainMenu_{name}.log"
 
 #教科辞書
-subjectList = {"Linux":"localhost:81","セキュリティ":"localhost:82"}
-
+subjectList = dict()
+#jsonからロード
+def loadSubject():
+    global subjectList
+    try:
+        with open(subjectListJsonPath,"r",encoding="utf-8_sig") as sublit:
+            subjectList = json.load(sublit)
+    except:
+        print("教科読み込みエラー:jsonファイル読み込み時にエラーが発生しました。")
+        exit()
 #time
 scanInterval = 60 * 60 * 60 #秒指定 定期処理タイマー
 liveLimit = 60 * 60 * 60 #秒指定
@@ -151,12 +163,14 @@ def searchForFree(dic):
         genKey += 1
     return genKey
 
+
 if __name__ == '__main__':
     thread = threading.Thread(target=organize)
     thread.daemon = True
     thread.start()
     print("定期処理スタート")
     try:
+        loadSubject()
         app.run(threaded = True,debug=True,host="0.0.0.0", port=80)
     except KeyboardInterrupt:
         print("サーバー終了中")

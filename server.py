@@ -8,6 +8,7 @@ import threading
 import datetime
 import time
 import hashlib
+import sys
 
 #URL
 URL_root = "/"
@@ -25,11 +26,13 @@ URL_mainMenu = URL_root + "mainmenu"
 #HTML Source path
 htmlSourcePath = "./index.html"
 resultSourcePath = "./result.html"
-problemsFilePath = "./problems.json"
 problemListHtmlSource = "./ProblemList.html"
 adminHtmlSource = "./admin.html"
 loginFromHtmlPath = "./auth.html"
 mainMenuHtmlPath = "./mainmanu.html"
+
+#問題jsonパス
+problemsFilePath = "./problems_{subjectName}.json"
 
 #log path
 logPath = "./log/{name}.log"
@@ -138,8 +141,12 @@ def loadproblemsFromJson():
       print("問題に問題はありませんでした。")
       return True,""
    except ProblemError:
-      print("問題に問題がありました。")
+      print("問題に問題がありました。",file=sys.stderr)
       return False,"JSONデータに不備があります。"
+   except FileNotFoundError:
+      print("問題ファイル:{probName}がありませんでした。ファイルを作成します。".format(probName=problemsFilePath,file=sys.stderr))
+      with open(problemsFilePath,mode="w") as probJson:
+         probJson.write("")
 
 #jsonデータのチェック
 def checkProblems():
@@ -149,7 +156,7 @@ def checkProblems():
 #上の独自例外
 class ProblemError(Exception):
    def __init__(self):
-      print("JSONデータの正答欄に不備があります。正答欄には1~4の半角数字を入力できます。")
+      print("JSONデータの正答欄に不備があります。正答欄には1~4の半角数字を入力できます。",file=sys.stderr)
 
 #htmlに問題データを乗せる(最初だけ)
 def problemWritingToHtml(problemNum,htmlSource,sessionID):
@@ -462,16 +469,27 @@ def getMainMenu():
       htmlSource = htso.read()
    return htmlSource
 
-if __name__ == '__main__':
+def subServer(subject,portNo):
+   global problemsFilePath
+   problemsFilePath = problemsFilePath.format(subjectName=subject)
    loadproblemsFromJson()
    thread = threading.Thread(target=organize)
    thread.daemon = True
    thread.start()
    print("定期処理スタート")
    try:
-      app.run(threaded = True,debug=True,host="0.0.0.0", port=80)
+      app.run(threaded = True,debug=True,host="0.0.0.0", port=portNo)
    except KeyboardInterrupt:
-      print("サーバー終了中")
+      print("サーバー終了中",file=sys.stderr)
       #ここに終了処理
    finally:
-      print("サーバ終了")
+      print("サーバ終了",file=sys.stderr)
+
+def main():
+   subServer(subject="test",portNo="81")
+
+if __name__ == '__main__':
+   try:
+      main()
+   except:
+      pass
