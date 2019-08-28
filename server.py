@@ -72,7 +72,6 @@ class RecordData():
       #print(res)
       return res[probNum]
 
-
 #URL
 URL_root = "/"
 URL_answerRequest = URL_root + "postText"
@@ -94,18 +93,22 @@ adminHtmlSource = "./admin.html"
 loginFromHtmlPath = "./auth.html"
 mainMenuHtmlPath = "./mainmanu.html"
 
-#問題jsonパス
-problemsFilePath = "./problems_{subjectName}.json"
-
 #log path
-logPath = "./log/{name}.log"
-loginLogPath = "./log/login_{name}.log"
+logPath = "./log/{name}_{subName}.log"
+loginLogPath = "./log/login_{name}_{subName}.log"
 
 #time
 scanInterval = 60 * 60 * 60 #秒指定 定期処理タイマー
 liveLimit = 60 * 60 * 60 #秒指定
 
+#サーバーインスタンス
 app = Flask(__name__,template_folder="./")
+
+#教科名
+subjectName = "None"
+
+#問題jsonパス
+problemsFilePath = "./problems_{subjectName}.json"
 
 #問題データセット
 problems = object()
@@ -424,7 +427,7 @@ def organize():
          logText += logTextTmplt.format(ip=ipAddr,num=tnum)
       adminLog = logText
       #保存
-      with open(logPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today())),mode="w") as l:
+      with open(logPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today()),subName=subjectName),mode="w") as l:
          l.write(logText)
       #ログイン試行ログの保存
       #何時何分に誰（IP）がログインID＋パスワードでログインを試みたかを残しておく
@@ -442,7 +445,7 @@ def organize():
          )
       #クリア
       loginLogList.clear()
-      with open(loginLogPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today())),mode="w") as l:
+      with open(loginLogPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today()),subName=subjectName),mode="w") as l:
          l.write(loginLogText)
 
 #ブラウザを閉じるときにアクセスURL辞書から削除する
@@ -470,9 +473,12 @@ def getMainMenu():
       htmlSource = htso.read()
    return htmlSource
 
-def subServer(subject,portNo):
+def main(subject,portNo):
    global problemsFilePath
-   problemsFilePath = problemsFilePath.format(subjectName=subject)
+   global subjectName
+   print("{subName}:サーバー起動".format(subName=subject))
+   subjectName=subject
+   problemsFilePath = problemsFilePath.format(subjectName=subjectName)
    loadproblemsFromJson()
    thread = threading.Thread(target=organize)
    thread.daemon = True
@@ -486,11 +492,10 @@ def subServer(subject,portNo):
    finally:
       print("サーバ終了",file=sys.stderr)
 
-def main():
-   subServer(subject="test",portNo="81")
-
 if __name__ == '__main__':
-   try:
-      main()
-   except:
-      pass
+   args = sys.argv
+   if len(args) < 3:
+      print("コマンドライン引数が不足しています。",file=sys.stderr)
+   elif len(args) > 4:
+      print("コマンドライン引数が多すぎます。",file=sys.stderr)
+   main(args[1],int(args[2]))

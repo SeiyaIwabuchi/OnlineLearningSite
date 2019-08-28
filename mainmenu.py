@@ -8,7 +8,7 @@ import threading
 import datetime
 import time
 import hashlib
-import server
+from subprocess import Popen,PIPE
 
 #URL
 URL_root = "/"
@@ -165,15 +165,26 @@ def searchForFree(dic):
 
 
 if __name__ == '__main__':
+    print("メインサーバー起動")
     thread = threading.Thread(target=organize)
     thread.daemon = True
     thread.start()
     print("定期処理スタート")
+    subServers = []
     try:
         loadSubject()
+        for subName,subURL in subjectList.items():
+            url = subURL.split(":")
+            print("> python server.py {subName} {port}".format(subName=subName,port=url[1]))
+            subServers.append(Popen(["python","server.py",subName,url[1]],stdout=PIPE,stderr=PIPE))
         app.run(threaded = True,debug=True,host="0.0.0.0", port=80)
     except KeyboardInterrupt:
         print("サーバー終了中")
         #ここに終了処理
+    except Exception as e:
+        print(e.with_traceback())
     finally:
+        for sub in subServers:
+            sub.terminate()
+            print("{procName}:終了".format(procName=sub.pid))
         print("サーバ終了")
