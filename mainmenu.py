@@ -13,6 +13,7 @@ from subprocess import Popen,PIPE
 #URL
 URL_root = "/"
 URL_mainMenu = URL_root + "mainmenu"
+URL_addSubject = URL_root + "addsub"
 
 #HTML Source path
 mainMenuHtmlPath = "./mainmanu.html"
@@ -31,6 +32,7 @@ def loadSubject():
     try:
         with open(subjectListJsonPath,"r",encoding="utf-8_sig") as sublit:
             subjectList = json.load(sublit)
+            print(subjectList)
     except:
         print("教科読み込みエラー:jsonファイル読み込み時にエラーが発生しました。")
         exit()
@@ -51,6 +53,10 @@ logList = []
 
 #連番生成用変数
 serialNumber = 0
+
+#サーバープロセス管理用
+subServers = []
+startedServers = []
 
 #成績データ
 class RecordData():
@@ -151,10 +157,26 @@ def getMainMenu():
     subjectListHtml = ""
     for subName,subURL in subjectList.items():
         subjectListHtml += subjectListTemp.format(URL="http://" + subURL,subName=subName) + "\n"
+    subjectListHtml += "<br>" + subjectListTemp.format(URL="http://" + "localhost" + URL_addSubject,subName="教科更新") + "\n"
     with open(mainMenuHtmlPath,'r',encoding="utf-8_sig") as htso:
         htmlSource = htso.read().format(buttons=subjectListHtml)
     return htmlSource
 
+#サーバー追加用メソッド
+@app.route(URL_addSubject)
+def addSubjectByWeb():
+    loadSubject()
+    flg_update = False
+    for subName,subURL in subjectList.items():
+        if not subName in startedServers:
+            url = subURL.split(":")
+            subServers.append(Popen(["python","server.py",subName,url[1]],stdout=PIPE,stderr=PIPE))
+            flg_update = True
+    if flg_update:
+        print("<h1>教科を更新しました。{subName}を追加</h1>".format(subName=subName))
+        return "<h1>教科を更新しました。{subName}を追加</h1>".format(subName=subName)
+    else:
+        return "<h1>教科の更新はありません。</h1>"
 #空きスペースを探してそこのキーを返す
 def searchForFree(dic):
     rKeys = dic.keys()
@@ -170,13 +192,13 @@ if __name__ == '__main__':
     thread.daemon = True
     thread.start()
     print("定期処理スタート")
-    subServers = []
     try:
         loadSubject()
         for subName,subURL in subjectList.items():
             url = subURL.split(":")
             print("> python server.py {subName} {port}".format(subName=subName,port=url[1]))
             subServers.append(Popen(["python","server.py",subName,url[1]],stdout=PIPE,stderr=PIPE))
+            startedServers.append(subName)
         app.run(threaded = True,debug=True,host="0.0.0.0", port=80)
     except KeyboardInterrupt:
         print("サーバー終了中")

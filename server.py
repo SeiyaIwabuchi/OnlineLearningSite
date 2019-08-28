@@ -149,8 +149,9 @@ def loadproblemsFromJson():
       return False,"JSONデータに不備があります。"
    except FileNotFoundError:
       print("問題ファイル:{probName}がありませんでした。ファイルを作成します。".format(probName=problemsFilePath,file=sys.stderr))
-      with open(problemsFilePath,mode="w") as probJson:
-         probJson.write("")
+      with open(problemsFilePath,mode="w",encoding="utf-8_sig") as probJson:
+         probJson.write("""[{"番号":"1","問題":"問題ファイルを更新してください","選択肢1":"管理者に連絡する","選択肢2":"自分で更新する","選択肢3":"サーバーをぶっ壊す","選択肢4":"寝る","正答":"3","解説":"回答しても何も起きませんよ。"}]""")
+         return -1 #もう一度ロードするメッセージ
 
 #jsonデータのチェック
 def checkProblems():
@@ -175,7 +176,8 @@ def problemWritingToHtml(problemNum,htmlSource,sessionID):
       RorW = "",
       correct = "",
       sessionID = str(sessionID),
-      comment = ""
+      comment = "",
+      subName=subjectName
       )
    return htmlSource
 
@@ -293,7 +295,8 @@ def setResult(sessionID=None):
             wrongNum = resultData[2],
             corrRate = str(float(resultData[3])*100) + "%",
             wrongRate = str(float(resultData[4])*100) + "%",
-            resultTable = resultHtmlTmp.format(trText = htmlResultTable)
+            resultTable = resultHtmlTmp.format(trText = htmlResultTable),
+            subName=subjectName
             )
       return htmlSource
    except KeyError:
@@ -321,7 +324,8 @@ def getProblemList():
       )
    with open(problemListHtmlSource,'r',encoding="utf-8_sig") as htso:
       htmlSource = htso.read().format(
-         resultTable = resultHtmlTmp.format(trText = htmlResultTable)
+         resultTable = resultHtmlTmp.format(trText = htmlResultTable),
+         subName=subjectName
          )
    return htmlSource
 
@@ -336,7 +340,7 @@ def getAdmin(hashedValue=None):
       htmlSource = ""
       with open(adminHtmlSource,'r',encoding="utf-8_sig") as htso:
          htmlSource = htso.read()
-      return htmlSource.format(log=adminLog)
+      return htmlSource.format(log=adminLog,subName=subjectName)
    else:
       return "<h1>認証エラー</h1>"
 
@@ -344,7 +348,7 @@ def getAdmin(hashedValue=None):
 @app.route(URL_upProblem, methods=['POST'])
 def upProblem():
    the_file = request.files['file_1']
-   the_file.save("./" + the_file.filename) #自動で上書きされる
+   the_file.save(problemsFilePath) #自動で上書きされる
    resultB,msg = loadproblemsFromJson()
    return the_file.filename + "がアップロードされ、問題の更新が" + "成功" if resultB else "失敗" + "しました。" + msg
 
@@ -356,7 +360,7 @@ def login():
    logList.append(request.remote_addr) #ログイン試行なのか問題を解きに来ただけなのか区別する必要がある。
    htmlSource = ""
    with open(loginFromHtmlPath,mode="r",encoding="utf-8_sig") as htso:
-      htmlSource = htso.read().format(sID=str(sessionID))
+      htmlSource = htso.read().format(sID=str(sessionID),subName=subjectName)
    return htmlSource
 
 #ログインログ用辞書を返すメソッド
@@ -479,7 +483,8 @@ def main(subject,portNo):
    print("{subName}:サーバー起動".format(subName=subject))
    subjectName=subject
    problemsFilePath = problemsFilePath.format(subjectName=subjectName)
-   loadproblemsFromJson()
+   if loadproblemsFromJson() == -1:
+      loadproblemsFromJson()
    thread = threading.Thread(target=organize)
    thread.daemon = True
    thread.start()
