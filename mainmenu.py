@@ -9,6 +9,7 @@ import datetime
 import time
 import hashlib
 from subprocess import Popen,PIPE
+import traceback
 
 #URL
 URL_root = "/"
@@ -33,8 +34,14 @@ def loadSubject():
         with open(subjectListJsonPath,"r",encoding="utf-8_sig") as sublit:
             subjectList = json.load(sublit)
             print(subjectList)
-    except:
+    except FileNotFoundError:
+        print("教科リストファイルが存在しないため作成します")
+        with open(subjectListJsonPath,"w",encoding="utf-8_sig") as sublit:
+            sublit.write("""{"教科を追加してください":"localhost:81"}""")
+            print(subjectList)
+    except Exception as e :
         print("教科読み込みエラー:jsonファイル読み込み時にエラーが発生しました。")
+        traceback.print_exc()
         exit()
 #time
 scanInterval = 60 * 60 * 60 #秒指定 定期処理タイマー
@@ -170,7 +177,7 @@ def addSubjectByWeb():
     for subName,subURL in subjectList.items():
         if not subName in startedServers:
             url = subURL.split(":")
-            subServers.append(Popen(["python","server.py",subName,url[1]],stdout=PIPE,stderr=PIPE))
+            subServers.append(Popen(["python","server.py",subName,url[1]],stdout=PIPE,stderr=PIPE,shell=True))
             flg_update = True
     if flg_update:
         print("<h1>教科を更新しました。{subName}を追加</h1>".format(subName=subName))
@@ -197,14 +204,14 @@ if __name__ == '__main__':
         for subName,subURL in subjectList.items():
             url = subURL.split(":")
             print("> python server.py {subName} {port}".format(subName=subName,port=url[1]))
-            subServers.append(Popen(["python","server.py",subName,url[1]],stdout=PIPE,stderr=PIPE))
+            subServers.append(Popen(["python","server.py",subName,url[1]],stdout=PIPE,stderr=PIPE,shell=True))
             startedServers.append(subName)
         app.run(threaded = True,debug=True,host="0.0.0.0", port=80)
     except KeyboardInterrupt:
         print("サーバー終了中")
         #ここに終了処理
     except Exception as e:
-        print(e.with_traceback())
+        traceback.print_exc()
     finally:
         for sub in subServers:
             sub.terminate()
