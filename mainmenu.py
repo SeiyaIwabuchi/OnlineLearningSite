@@ -11,6 +11,12 @@ import hashlib
 from subprocess import Popen,PIPE
 import traceback
 
+#serverDmain
+serverAddress = "iwabuchi.ddns.net"
+
+#debugMode
+isLocalhost = False
+
 #URL
 URL_root = "/"
 URL_mainMenu = URL_root + "mainmenu"
@@ -37,7 +43,10 @@ def loadSubject():
     except FileNotFoundError:
         print("教科リストファイルが存在しないため作成します")
         with open(subjectListJsonPath,"w",encoding="utf-8_sig") as sublit:
-            sublit.write("""{"教科を追加してください":"localhost:81"}""")
+            if isLocalhost:
+                sublit.write("""{"教科を追加してください":"localhost:81"}""")
+            else:
+                sublit.write("""{"教科を追加してください":"iwabuchi.ddns.net:81"}""")
             print(subjectList)
     except Exception as e :
         print("教科読み込みエラー:jsonファイル読み込み時にエラーが発生しました。")
@@ -164,7 +173,7 @@ def getMainMenu():
     subjectListHtml = ""
     for subName,subURL in subjectList.items():
         subjectListHtml += subjectListTemp.format(URL="http://" + subURL,subName=subName) + "\n"
-    subjectListHtml += "<br>" + subjectListTemp.format(URL="http://" + "localhost" + URL_addSubject,subName="教科更新") + "\n"
+    subjectListHtml += "<br>" + subjectListTemp.format(URL="http://" + serverAddress if not isLocalhost else "localhost" + URL_addSubject,subName="教科更新") + "\n"
     with open(mainMenuHtmlPath,'r',encoding="utf-8_sig") as htso:
         htmlSource = htso.read().format(buttons=subjectListHtml)
     return htmlSource
