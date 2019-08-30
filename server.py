@@ -490,7 +490,7 @@ def main(subject,portNo):
    thread.start()
    print("定期処理スタート")
    try:
-      app.run(debug=True,host="0.0.0.0", port=portNo)
+      app.run(threaded = False,debug=False,host="0.0.0.0", port=portNo)
    except KeyboardInterrupt:
       print("サーバー終了中",file=sys.stderr)
       #ここに終了処理

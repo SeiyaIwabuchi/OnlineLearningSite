@@ -215,7 +215,7 @@ if __name__ == '__main__':
             print("> python server.py {subName} {port}".format(subName=subName,port=url[1]))
             subServers.append(Popen(["python","server.py",subName,url[1]],stdout=PIPE,stderr=PIPE,shell=True))
             startedServers.append(subName)
-        app.run(debug=True,host="0.0.0.0", port=80)
+        app.run(threaded = True,debug=False,host="0.0.0.0", port=80)
     except KeyboardInterrupt:
         print("サーバー終了中")
         #ここに終了処理
@@ -224,5 +224,5 @@ if __name__ == '__main__':
     finally:
         for sub in subServers:
             sub.terminate()
-            print("{procName}:終了".format(procName=sub.pid))
+            print("{procName}:終了".format(procName=sub.poll()))
         print("サーバ終了")
