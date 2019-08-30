@@ -10,6 +10,12 @@ import time
 import hashlib
 import sys
 
+#serverDmain
+serverAddress = "iwabuchi.ddns.net"
+
+#debugMode
+isLocalhost = True
+
 #ログインセッションデータセット
 class LoginDataSet():
    def __init__(self,rmIP):
@@ -177,7 +183,8 @@ def problemWritingToHtml(problemNum,htmlSource,sessionID):
       correct = "",
       sessionID = str(sessionID),
       comment = "",
-      subName=subjectName
+      subName=subjectName,
+      dom= "localhost" if isLocalhost else serverAddress
       )
    return htmlSource
 
@@ -296,7 +303,8 @@ def setResult(sessionID=None):
             corrRate = str(float(resultData[3])*100) + "%",
             wrongRate = str(float(resultData[4])*100) + "%",
             resultTable = resultHtmlTmp.format(trText = htmlResultTable),
-            subName=subjectName
+            subName=subjectName,
+            dom= "localhost" if isLocalhost else serverAddress
             )
       return htmlSource
    except KeyError:
