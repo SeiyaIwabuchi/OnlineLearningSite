@@ -197,7 +197,7 @@ def addSubjectByWeb():
         print("<h1>教科を更新しました。{subName}を追加</h1>".format(subName=subName))
         return "<h1>教科を更新しました。{subName}を追加</h1>".format(subName=subName) + """<input type="button" class="btn btn-default" onclick="location.href='http://{dom}/mainmenu'" value="メニューに戻る">"""
     else:
-        return "<h1>教科の更新はありません。</h1>"
+        return "<h1>教科の更新はありません。</h1>" + """<input type="button" class="btn btn-default" onclick="location.href='http://{dom}/mainmenu'" value="メニューに戻る">"""
 #空きスペースを探してそこのキーを返す
 def searchForFree(dic):
     rKeys = dic.keys()
