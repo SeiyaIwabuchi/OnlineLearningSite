@@ -15,7 +15,7 @@ import traceback
 serverAddress = "iwabuchi.ddns.net"
 
 #debugMode
-isLocalhost = True
+isLocalhost = False
 
 #URL
 URL_root = "/"
