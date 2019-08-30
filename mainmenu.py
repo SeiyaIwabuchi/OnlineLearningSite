@@ -10,12 +10,16 @@ import time
 import hashlib
 from subprocess import Popen,PIPE
 import traceback
+import os
 
 #serverDmain
 serverAddress = "iwabuchi.ddns.net"
 
 #debugMode
 isLocalhost = False
+
+#pythonコマンド
+pythonCommand = "python" #windowsの場合
 
 #URL
 URL_root = "/"
@@ -186,7 +190,7 @@ def addSubjectByWeb():
     for subName,subURL in subjectList.items():
         if not subName in startedServers:
             url = subURL.split(":")
-            subServers.append(Popen(["python","server.py",subName,url[1]],stdout=PIPE,stderr=PIPE))
+            subServers.append(Popen([pythonCommand,"server.py",subName,url[1]],stdout=PIPE,stderr=PIPE))
             flg_update = True
     if flg_update:
         print("<h1>教科を更新しました。{subName}を追加</h1>".format(subName=subName))
@@ -203,6 +207,9 @@ def searchForFree(dic):
 
 
 if __name__ == '__main__':
+    global pythonCommand
+    if os.name == "posix":
+        pythonCommand += "3"
     print("メインサーバー起動")
     thread = threading.Thread(target=organize)
     thread.daemon = True
@@ -212,8 +219,8 @@ if __name__ == '__main__':
         loadSubject()
         for subName,subURL in subjectList.items():
             url = subURL.split(":")
-            print("> python server.py {subName} {port}".format(subName=subName,port=url[1]))
-            subServers.append(Popen(["python","server.py",subName,url[1]],stdout=PIPE,stderr=PIPE,shell=True))
+            print("> {pycom} server.py {subName} {port}".format(pycom=pythonCommand,subName=subName,port=url[1]))
+            subServers.append(Popen([pythonCommand,"server.py",subName,url[1]],stdout=PIPE,stderr=PIPE,shell=True))
             startedServers.append(subName)
         app.run(threaded = True,debug=False,host="0.0.0.0", port=80)
     except KeyboardInterrupt:
