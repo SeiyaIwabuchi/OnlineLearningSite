@@ -16,7 +16,7 @@ import os
 serverAddress = "iwabuchi.ddns.net"
 
 #debugMode
-isLocalhost = True
+isLocalhost = False
 
 #pythonコマンド
 pythonCommand = "python" #windowsの場合

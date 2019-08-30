@@ -14,7 +14,7 @@ import sys
 serverAddress = "iwabuchi.ddns.net"
 
 #debugMode
-isLocalhost = True
+isLocalhost = False
 
 #ログインセッションデータセット
 class LoginDataSet():
