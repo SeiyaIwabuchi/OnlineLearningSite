@@ -173,7 +173,7 @@ def getMainMenu():
     subjectListHtml = ""
     for subName,subURL in subjectList.items():
         subjectListHtml += subjectListTemp.format(URL="http://" + subURL,subName=subName) + "\n"
-    subjectListHtml += "<br>" + subjectListTemp.format(URL="http://" + serverAddress if not isLocalhost else "localhost" + URL_addSubject,subName="教科更新") + "\n"
+    subjectListHtml += "<br>" + subjectListTemp.format(URL="http://" + serverAddress if not isLocalhost else "localhost"  + "/" + URL_addSubject,subName="教科更新") + "\n"
     with open(mainMenuHtmlPath,'r',encoding="utf-8_sig") as htso:
         htmlSource = htso.read().format(buttons=subjectListHtml)
     return htmlSource
