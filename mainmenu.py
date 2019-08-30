@@ -207,7 +207,7 @@ def searchForFree(dic):
 
 
 if __name__ == '__main__':
-    global pythonCommand
+    pythonCommand
     if os.name == "posix":
         pythonCommand += "3"
     print("メインサーバー起動")
