@@ -192,6 +192,7 @@ def addSubjectByWeb():
             url = subURL.split(":")
             subServers.append(Popen([pythonCommand,"server.py",subName,url[1]],stdout=PIPE,stderr=PIPE))
             flg_update = True
+            startedServers.append(subName)
     if flg_update:
         print("<h1>教科を更新しました。{subName}を追加</h1>".format(subName=subName))
         return "<h1>教科を更新しました。{subName}を追加</h1>".format(subName=subName)
