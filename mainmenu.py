@@ -207,7 +207,6 @@ def searchForFree(dic):
 
 
 if __name__ == '__main__':
-    pythonCommand
     if os.name == "posix":
         pythonCommand += "3"
     print("メインサーバー起動")
@@ -220,7 +219,7 @@ if __name__ == '__main__':
         for subName,subURL in subjectList.items():
             url = subURL.split(":")
             print("> {pycom} server.py {subName} {port}".format(pycom=pythonCommand,subName=subName,port=url[1]))
-            subServers.append(Popen([pythonCommand,"server.py",subName,url[1]],stdout=PIPE,stderr=PIPE,shell=True))
+            subServers.append(Popen([pythonCommand,"server.py",subName,url[1]],stdout=PIPE,stderr=PIPE))
             startedServers.append(subName)
         app.run(threaded = True,debug=False,host="0.0.0.0", port=80)
     except KeyboardInterrupt:
