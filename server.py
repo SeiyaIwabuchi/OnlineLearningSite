@@ -438,9 +438,10 @@ def organize():
       for ipAddr,tnum in list(tmpDict.items()):
          logText += logTextTmplt.format(ip=ipAddr,num=tnum)
       adminLog = logText
-      #保存
-      with open(logPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today()),subName=subjectName),mode="w") as l:
-         l.write(logText)
+      #保存 何もないなら保存しない
+      if logText != "":
+         with open(logPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today()),subName=subjectName),mode="w") as l:
+            l.write(logText)
       #ログイン試行ログの保存
       #何時何分に誰（IP）がログインID＋パスワードでログインを試みたかを残しておく
       loginLogFormat = "{date} : [{IPaddr}] ID={loginID}, PASS={passwd}, available={avl},hashedSerial={hsdSerl}\n"
@@ -457,8 +458,9 @@ def organize():
          )
       #クリア
       loginLogList.clear()
-      with open(loginLogPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today()),subName=subjectName),mode="w") as l:
-         l.write(loginLogText)
+      if loginLogText != "":
+         with open(loginLogPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today()),subName=subjectName),mode="w") as l:
+            l.write(loginLogText)
 
 #ブラウザを閉じるときにアクセスURL辞書から削除する
 @app.route(URL_deleteAdminURL)

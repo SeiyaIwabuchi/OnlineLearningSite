@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
   <head>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=yes">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
     <meta charset="utf-8"></meta>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
-    <meta content="width=device-width, initial-scale=1" name="viewport"></meta>
     <title>オンライン学習</title>
     <!-- Bootstrap CDN -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
@@ -19,8 +18,13 @@
       </div>
       <div id="main">
           <div id="container-fluid">
-            <h1 id="problem">{problem}</h1>
-            <h3>{subName}</h3>
+            <h6>教科：{subName}</h6>
+            <div id="box">
+              <div id="center">
+                <h3>問題</h3>
+              </div>
+              <h4 id="problem">{problem}</h4>
+            </div>
             <input type="radio" name="rad" value="1" id="radio1"><label id="radio1Label">{choices1}</label>
             <br>
             <input type="radio" name="rad" value="2" id="radio2"><label id="radio2Label">{choices2}</label>
@@ -29,15 +33,17 @@
             <br>
             <input type="radio" name="rad" value="4" id="radio4"><label id="radio4Label">{choices4}</label>
             <br>
-            <button id="ansButton" class="btn btn-default">回答する</button>
-            <h4 id="RorW">{RorW}</h3>
-            <h4 id="Correct">{correct}</h3>
-            <h3 id="解説">解説</h3>
-            <h4 id="Comment">{comment}</h3>
-            <button id="next" class="btn btn-default">次の問題</button>
-            <br>
-            <br>
-            <input type="button" class="btn btn-default" onclick="window.open('/ProblemList.html','_blank')" value="問題一覧を見る">
+            <div id="menu">
+              <button id="ansButton" class="btn btn-default">回答する</button>
+              <h4 id="RorW">{RorW}</h3>
+              <h4 id="Correct">{correct}</h3>
+              <h3 id="解説">解説</h3>
+              <h4 id="Comment">{comment}</h3>
+              <button id="next" class="btn btn-default">次の問題</button>
+              <br>
+              <br>
+              <input type="button" class="btn btn-default" onclick="window.open('/ProblemList.html','_blank')" value="問題一覧を見る">
+            </div>
             <br>
         </div>
       </div>
@@ -48,8 +54,10 @@
           <br>問題一覧は別タブに開くようにしました。
           <br>サーバーが更新されたときに進捗が全部飛んでしまうのはお許しください。。。
         </h6>
-        <input type="button" class="btn btn-default" onclick="window.open('http://{dom}/mainmenu','_blank')" value="メニュー">
-        <input type="button" class="btn btn-default" onclick="window.open('/login','_blank')" value="ログイン">
+        <div id="menu">
+          <input type="button" class="btn btn-default" onclick="window.open('http://{dom}/mainmenu','_blank')" value="メニュー">
+          <input type="button" class="btn btn-default" onclick="window.open('/login','_blank')" value="ログイン">
+        </div>
       </div>
     </div>
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>

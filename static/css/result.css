@@ -2,6 +2,15 @@
 	margin: 0;
 	padding: 0; /* 全てのプロパティの余白とパディングをリセットしています。*/
   }
+  #center{
+	text-align: center;
+	text-decoration: underline;
+  }
+  #box{
+	border: 1px solid #aaa;
+	background-color: bisque;
+	padding:1%;
+  }
   @media screen and (min-width: 767px) { /*ウィンドウ幅が767px以上の場合に適用*/
 	#wrapper {
 	  width: 700px;
@@ -14,10 +23,13 @@
 	#main {
 	  width: 700px;     /* メニューとコンテンツを囲んでいます。 */
 	  overflow: hidden; /* 親ボックスでフロート解除します。*/
+  
 	}
 	#menu {
-	  float: right;
-	  width: 150px;     /* floatの width 指定は必須です。*/
+	  text-align:center;
+  	  display: flex;
+  	  flex-direction: column;
+	  width: auto;     /* floatの width 指定は必須です。*/
 	}
 	#contents {
 	  float: right;
@@ -46,7 +58,9 @@
 	  overflow: hidden; /* 親ボックスでフロート解除します。*/
 	}
 	#menu {
-	  float: right;
+	  text-align:center;
+  	  display: flex;
+  	  flex-direction: column;
 	  width: auto;     /* floatの width 指定は必須です。*/
 	}
 	#contents {
