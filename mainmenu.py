@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#うんこうんこ
 
 from flask import Flask, render_template
 from flask import request, jsonify
