@@ -94,4 +94,7 @@ function init() {
       }
     });
   });
+  $("#getMyResult").click(function(){
+    window.open("/result/" + $("#sessionID").text());
+  });
 }
