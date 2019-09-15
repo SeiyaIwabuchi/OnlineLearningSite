@@ -95,6 +95,6 @@ function init() {
     });
   });
   $("#getMyResult").click(function(){
-    window.open("/result/" + $("#sessionID").text());
+    window.open("/result/" + $("#sessionID").text(),"_blank");
   });
 }
