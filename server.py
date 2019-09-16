@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from flask import Flask, render_template
+from flask import Flask, render_template, make_response
 from flask import request, jsonify
 import json
 import threading
@@ -15,6 +15,11 @@ serverAddress = "iwabuchi.ddns.net"
 
 #debugMode
 isLocalhost = False
+
+#sessionクラス
+class Session:
+   NoSession = "NoSession"
+   sessionID = "sessionID"
 
 #ログインセッションデータセット
 class LoginDataSet():
@@ -41,7 +46,7 @@ class RecordData():
          self.correctAnswers,
          self.wrongAnswers,
          self.correctAnswers / self.totalAnswers,
-         self.wrongAnswers / self.totalAnswers
+         self.totalAnswers / len(problems)
          ]
       return data
    #引数に指定された問題番号の正誤を返す
@@ -82,7 +87,7 @@ class RecordData():
 URL_root = "/"
 URL_answerRequest = URL_root + "postText"
 URL_nextProblem = URL_root + "nextPoroblem"
-URL_result = URL_root + "result/<sessionID>"
+URL_result = URL_root + "result"
 URL_ProblemList = URL_root + "ProblemList.html"
 URL_admin = URL_root + "admin.html/<hashedValue>"
 URL_upProblem = URL_root + "upProblem"
@@ -90,6 +95,7 @@ URL_login = URL_root + "login"
 URL_auth = URL_root + "auth"
 URL_deleteAdminURL = URL_root + "deleteAdminURL/<palmt>"
 URL_mainMenu = URL_root + "mainmenu"
+URL_deleteRecord = URL_root + "deleteRecord"
 
 #HTML Source path
 htmlSourcePath = "./index.html"
@@ -171,22 +177,26 @@ class ProblemError(Exception):
 
 #htmlに問題データを乗せる(最初だけ)
 def problemWritingToHtml(problemNum,htmlSource,sessionID):
-   tmpDict = problems[problemNum]
-   #print(tmpDict)
-   htmlSource = htmlSource.format(
-      problem = tmpDict["問題"],
-      choices1 = tmpDict["選択肢1"],
-      choices2 = tmpDict["選択肢2"],
-      choices3 = tmpDict["選択肢3"],
-      choices4 = tmpDict["選択肢4"],
-      RorW = "",
-      correct = "",
-      sessionID = str(sessionID),
-      comment = "",
-      subName=subjectName,
-      dom= "localhost" if isLocalhost else serverAddress
-      )
-   return htmlSource
+   try:
+      tmpDict = problems[problemNum]
+      #print(tmpDict)
+      htmlSource = htmlSource.format(
+         problem = tmpDict["問題"],
+         choices1 = tmpDict["選択肢1"],
+         choices2 = tmpDict["選択肢2"],
+         choices3 = tmpDict["選択肢3"],
+         choices4 = tmpDict["選択肢4"],
+         RorW = "",
+         correct = "",
+         sessionID = str(sessionID),
+         comment = "",
+         subName=subjectName,
+         dom= "localhost" if isLocalhost else serverAddress
+         )
+      return htmlSource
+   except IndexError:
+      return "<script> location.href='/result'; </script>"
+   
 
 def raidoRes2Number(radioRes):
    for index,b in enumerate(radioRes):
@@ -202,41 +212,51 @@ def judgment(problemNum,choice):
 
 @app.route(URL_root)
 def index():
-   sessionID = searchForFree(recordDict)
-   recordDict[str(sessionID)] = RecordData()
+   sessionID = request.cookies.get(Session.sessionID,Session.NoSession)
+   if sessionID == Session.NoSession or not (sessionID in recordDict.keys()):
+      #新規ユーザーへの処理
+      sessionID = searchForFree(recordDict)
+      recordDict[str(sessionID)] = RecordData()
+   
+   #ロギング
    recordDict[str(sessionID)].remoteIP = request.remote_addr
    logList.append(request.remote_addr)
+
+   #クライアントへの返答
    with open(htmlSourcePath,'r',encoding="utf-8_sig") as htso:
-      #htmlSource = htso.read().format(sessionID = int(sessions[len(sessions)-1]))
       htmlSource = htso.read()
-      htmlSource = problemWritingToHtml(0,htmlSource,sessionID)
-   return htmlSource
+      htmlSource = problemWritingToHtml(recordDict[str(sessionID)].totalAnswers,htmlSource,sessionID)
+      response = make_response(htmlSource)
+      # Cookieの設定を行う
+      max_age = liveLimit
+      expires = int(datetime.datetime.now().timestamp()) + max_age
+      response.set_cookie(Session.sessionID, value=str(sessionID), max_age=max_age, expires=expires, path='/', secure=None, httponly=False)
+   return response
 
 #回答するを押したときの動作
 @app.route(URL_answerRequest, methods=['POST'])
 def receiveAnswer():
    radioRes = []
+   sessionID = request.cookies.get(Session.sessionID,None)
+
    for i in range(4):
       radioRes.append(request.json['radio%d'%(i+1)])
-   #print("sessionID : " + request.json["sessionID"],end=" ")
-   #print("SelecedNumber : " + str(raidoRes2Number(radioRes)),end="")
-   #print("problemNumber : " + str(request.json["probNum"]))
 
-   recordDict[request.json["sessionID"]].answers.append(raidoRes2Number(radioRes))
-   RorW = judgment(request.json["probNum"],recordDict[request.json["sessionID"]].answers[len(recordDict[request.json["sessionID"]].answers)-1])
-   recordDict[request.json["sessionID"]].totalAnswers += 1
-   recordDict[request.json["sessionID"]].lastAccessTime = datetime.datetime.today()
+   recordDict[sessionID].answers.append(raidoRes2Number(radioRes))
+   RorW = judgment(recordDict[sessionID].totalAnswers,recordDict[sessionID].answers[len(recordDict[sessionID].answers)-1])
+   recordDict[sessionID].totalAnswers += 1
+   recordDict[sessionID].lastAccessTime = datetime.datetime.today()
    if RorW:
-      recordDict[request.json["sessionID"]].correctAnswers += 1
-      recordDict[request.json["sessionID"]].correctNumber.append(int(request.json["probNum"]))
+      recordDict[sessionID].correctAnswers += 1
+      recordDict[sessionID].correctNumber.append(recordDict[sessionID].totalAnswers-1)
    else:
-      recordDict[request.json["sessionID"]].wrongAnswers += 1
-      recordDict[request.json["sessionID"]].wrongNumber.append(int(request.json["probNum"]))
+      recordDict[sessionID].wrongAnswers += 1
+      recordDict[sessionID].wrongNumber.append(recordDict[sessionID].totalAnswers-1)
 
    return_data = {
       "RorW":RorW,
-      "correct":problems[int(request.json["probNum"])]["選択肢" + problems[int(request.json["probNum"])]["正答"]],
-      "comment":problems[int(request.json["probNum"])]["解説"] if problems[int(request.json["probNum"])]["解説"] != "" else "特になし"
+      "correct":problems[recordDict[sessionID].totalAnswers-1]["選択肢" + problems[recordDict[sessionID].totalAnswers-1]["正答"]],
+      "comment":problems[recordDict[sessionID].totalAnswers-1]["解説"] if problems[recordDict[sessionID].totalAnswers-1]["解説"] != "" else "特になし"
       }
    return jsonify(ResultSet=json.dumps(return_data))
 
@@ -244,7 +264,8 @@ def receiveAnswer():
 @app.route(URL_nextProblem, methods=['POST'])
 def nextPoroblem():
    #サーバー側では問題jsonの組み立てを行う
-   probNum = request.json["requestProblem"]
+   sessionID = request.cookies.get(Session.sessionID,None)
+   probNum = recordDict[sessionID].totalAnswers
    try:
       problemJson = {
          "problem":problems[probNum]["問題"],
@@ -279,7 +300,8 @@ data = [
          ]
 """
 @app.route(URL_result)
-def setResult(sessionID=None):
+def setResult():
+   sessionID = request.cookies.get(Session.sessionID,None)
    try:
       resultData = recordDict[sessionID].getStatistics()
       resultHtmlTmp = "\
@@ -289,9 +311,6 @@ def setResult(sessionID=None):
       "
       tdTagTmp = "<td>{rdText}</td>\n"
       htmlResultTable = ""
-      #print("SessionID : " + sessionID)
-      #print(recordDict[sessionID].correctNumber)
-      #print(recordDict[sessionID].wrongNumber)
       for i in range(resultData[0]): #resultData[0]は回答した問題数。
          htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = problems[i]["問題"]) + tdTagTmp.format(rdText = problems[i]["選択肢" + str(recordDict[sessionID].answers[i]+1)]) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
       with open(resultSourcePath,'r',encoding="utf-8_sig") as htso:
@@ -507,10 +526,29 @@ def main(subject,portNo):
    finally:
       print("サーバ終了",file=sys.stderr)
 
+@app.after_request
+def add_header(r):
+   """
+   Add headers to both force latest IE rendering engine or Chrome Frame,
+   and also to cache the rendered page for 10 minutes.
+   """
+   r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+   r.headers["Pragma"] = "no-cache"
+   r.headers["Expires"] = "0"
+   r.headers['Cache-Control'] = 'public, max-age=0'
+   return r
+
+@app.route(URL_deleteRecord)
+def deleteRecord():
+   global recordDict
+   sessionID = request.cookies.get(Session.sessionID,None)
+   recordDict[sessionID] = RecordData()
+   return "<script> location.href='/' </script>"
+
 if __name__ == '__main__':
    args = sys.argv
    if len(args) < 3:
-      print("コマンドライン引数が不足しています。",file=sys.stderr)
+      print("コマンドライン引数が不足しています。第1引数に教科名,第2引数にポートを指定してください。",file=sys.stderr)
    elif len(args) > 4:
       print("コマンドライン引数が多すぎます。",file=sys.stderr)
    main(args[1],int(args[2]))

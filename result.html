@@ -24,7 +24,7 @@
           <h3>正答数 : {corrNum}</h3>
           <h3>誤答数 : {wrongNum}</h3>
           <h3>正答率 : {corrRate}</h3>
-          <h3>誤答率 : {wrongRate}</h3>
+          <h3>回答率 : {wrongRate}</h3>
           <table class="table table-striped">
             <tr>
               <td>問題</td>
@@ -34,9 +34,9 @@
             {resultTable}
           </table>
           <div id="menu">
-            <input type="button" class="btn btn-default" onclick="window.open('/ProblemList.html','_blank')" value="問題一覧を見る">
-            <input type="button" class="btn btn-default" onclick="location.href='/'" value="もう一度解く">
-            <input type="button" onclick="window.open('about:blank','_self').close()" value="戻る" />
+            <input type="button" class="btn btn-default" onclick="location.href='/ProblemList.html'" value="問題一覧を見る">
+            <input type="button" class="btn btn-default" onclick="location.href='/'" value="問題に戻る">
+            <input type="button" class="btn btn-default" onclick="location.href='/deleteRecord'" value="もう一度解く">
             <input type="button" class="btn btn-default" onclick="location.href='http://{dom}/mainmenu'" value="メニューに戻る">
           </div>
         </div>
@@ -46,7 +46,7 @@
       </div>
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-      <script src=""></script>
+      <script></script>
     </div>
   </body>
 </html>
