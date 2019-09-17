@@ -127,7 +127,7 @@ loginLogPath = "./log/login_{name}_{subName}.log"
 
 #time
 scanInterval = 60 * 60 #秒指定 定期処理タイマー
-liveLimit = 60 * 60 #秒指定
+liveLimit = 60 * 60  * 24 * 120 #秒指定
 
 #サーバーインスタンス
 app = Flask(__name__,template_folder="./")
