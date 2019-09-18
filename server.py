@@ -15,6 +15,8 @@ import pickle
 
 #serverDmain
 serverAddress = "iwabuchi.ddns.net"
+#portNum
+portNum = None
 
 #debugMode
 isLocalhost = False
@@ -535,6 +537,8 @@ def main(subject,portNo):
    global subjectName
    global recordDict
    global serialNumber
+   global portNum
+   portNum = portNo
    print("{subName}:サーバー起動".format(subName=subject))
    subjectName=subject
    problemsFilePath = problemsFilePath.format(subjectName=subjectName)

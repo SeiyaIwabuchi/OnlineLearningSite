@@ -15,6 +15,9 @@ import os
 #serverDmain
 serverAddress = "iwabuchi.ddns.net"
 
+#port番号
+portNum = None
+
 #debugMode
 isLocalhost = False
 
@@ -181,6 +184,10 @@ def getMainMenu():
     with open(mainMenuHtmlPath,'r',encoding="utf-8_sig") as htso:
         htmlSource = htso.read().format(buttons=subjectListHtml)
     return htmlSource
+
+@app.route("/")
+def redirectToMainmenu():
+   return "<script> location.href='/mainmenu'</script>"
 
 #サーバー追加用メソッド
 @app.route(URL_addSubject)
