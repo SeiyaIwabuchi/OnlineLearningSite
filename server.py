@@ -9,8 +9,6 @@ import datetime
 import time
 import hashlib
 import sys
-import random
-import math
 
 #serverDmain
 serverAddress = "iwabuchi.ddns.net"
@@ -42,8 +40,6 @@ class RecordData():
       self.lastAccessTime = datetime.datetime.today()
       self.remoteIP = object()
       self.answers = []
-      self.problemNumberList = [] #出題する問題の並びを制御する
-      self.shuffle()
    def getStatistics(self):
       data = [
          self.totalAnswers,
@@ -86,17 +82,6 @@ class RecordData():
             res.append(True)
       #print(res)
       return res[probNum]
-   def normalSequence(self):
-      for i in range(len(problems)):
-         self.problemNumberList.append(i)
-   def shuffle(self):
-      i = len(problems) - 1
-      while (i > 0):
-         j = math.floor(random.random() * (i + 1))
-         swap = self.problemNumberList[i]
-         self.problemNumberList[i] = self.problemNumberList[j]
-         self.problemNumberList[j] = swap
-         i = (i - 1)
 
 #URL
 URL_root = "/"
@@ -237,12 +222,10 @@ def index():
    recordDict[str(sessionID)].remoteIP = request.remote_addr
    logList.append(request.remote_addr)
 
-   probNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
-
    #クライアントへの返答
    with open(htmlSourcePath,'r',encoding="utf-8_sig") as htso:
       htmlSource = htso.read()
-      htmlSource = problemWritingToHtml(probNum,htmlSource,sessionID)
+      htmlSource = problemWritingToHtml(recordDict[str(sessionID)].totalAnswers,htmlSource,sessionID)
       response = make_response(htmlSource)
       # Cookieの設定を行う
       max_age = liveLimit
@@ -260,7 +243,7 @@ def receiveAnswer():
       radioRes.append(request.json['radio%d'%(i+1)])
 
    recordDict[sessionID].answers.append(raidoRes2Number(radioRes))
-   RorW = judgment(recordDict[sessionID].recordDict[sessionID].totalAnswers,recordDict[sessionID].answers[len(recordDict[sessionID].answers)-1])
+   RorW = judgment(recordDict[sessionID].totalAnswers,recordDict[sessionID].answers[len(recordDict[sessionID].answers)-1])
    recordDict[sessionID].totalAnswers += 1
    recordDict[sessionID].lastAccessTime = datetime.datetime.today()
    if RorW:
@@ -561,15 +544,6 @@ def deleteRecord():
    sessionID = request.cookies.get(Session.sessionID,None)
    recordDict[sessionID] = RecordData()
    return "<script> location.href='/' </script>"
-
-@app.route("/test")
-def testFunc():
-   sessionID = request.cookies.get(Session.sessionID,None)
-   recordDict[sessionID].normalSequence()
-   print(recordDict[sessionID].problemNumberList)
-   recordDict[sessionID].shuffle()
-   print(recordDict[sessionID].problemNumberList)
-   return "レスポンス"
 
 if __name__ == '__main__':
    args = sys.argv
