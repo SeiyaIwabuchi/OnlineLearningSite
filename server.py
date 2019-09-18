@@ -18,6 +18,9 @@ serverAddress = "iwabuchi.ddns.net"
 #portNum
 portNum = None
 
+#問題更新日時
+problemUpdateTime = datetime.datetime.now()
+
 #debugMode
 isLocalhost = False
 
@@ -47,6 +50,7 @@ class RecordData():
       self.answers = []
       self.problemNumberList = [] #出題する問題の並びを制御する
       self.shuffle()
+      self.cookieCreateTime = datetime.datetime.now()
    def getStatistics(self):
       data = [
          self.totalAnswers,
@@ -116,6 +120,7 @@ URL_auth = URL_root + "auth"
 URL_deleteAdminURL = URL_root + "deleteAdminURL/<palmt>"
 URL_mainMenu = URL_root + "mainmenu"
 URL_deleteRecord = URL_root + "deleteRecord"
+URL_updateCookie = URL_root + "updateCookie"
 
 #HTML Source path
 htmlSourcePath = "./index.html"
@@ -170,11 +175,14 @@ serialNumber = 0
 #問題データ読み込み
 def loadproblemsFromJson():
    global problems
+   global problemUpdateTime
    try:
       with open(problemsFilePath,"r",encoding="utf-8_sig") as prob:
          problems = json.load(prob)
       checkProblems()
       print("問題に問題はありませんでした。")
+      problemUpdateTime = datetime.datetime.now()
+      print(problemUpdateTime)
       return True,""
    except ProblemError:
       print("問題に問題がありました。",file=sys.stderr)
@@ -235,9 +243,22 @@ def index():
    sessionID = request.cookies.get(Session.sessionID,Session.NoSession)
    if sessionID == Session.NoSession or not (sessionID in recordDict.keys()):
       #新規ユーザーへの処理
+      print("new user")
       sessionID = searchForFree(recordDict)
       recordDict[str(sessionID)] = RecordData()
-   
+   elif recordDict[sessionID].cookieCreateTime < problemUpdateTime: #念のために10秒進める。
+      print("old user")
+      sdkjs = """問題が更新されました。\\n新しい問題を回答しますか？\\n(新しい問題に切り替えると進捗がすべて消えます。\\n現在の回答終了後に「最初から始める」から更新後の問題を解くことができます。)""".encode("shift_jis").decode("shift_jis")
+      return "\
+         <script>\
+            if(window.confirm(\""+sdkjs+"\")){\
+               location.href = '/deleteRecord'\
+            }else{\
+               location.href = '/updateCookie'\
+            }\
+         </script>\
+      "
+   print(recordDict[sessionID].cookieCreateTime - problemUpdateTime)
    #ロギング
    recordDict[str(sessionID)].remoteIP = request.remote_addr
    logList.append(request.remote_addr)
@@ -594,6 +615,13 @@ def testFunc():
    recordDict[sessionID].shuffle()
    print(recordDict[sessionID].problemNumberList)
    return "レスポンス"
+
+@app.route(URL_updateCookie)
+def updateCookie():
+   global recordDict
+   sessionID = request.cookies.get(Session.sessionID,None)
+   recordDict[sessionID].cookieCreateTime = datetime.datetime.now()
+   return "<script> location.href='/' </script>"
 
 if __name__ == '__main__':
    args = sys.argv
