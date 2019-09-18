@@ -9,6 +9,7 @@ import datetime
 import time
 import hashlib
 import sys
+import pickle
 
 #serverDmain
 serverAddress = "iwabuchi.ddns.net"
@@ -519,11 +520,22 @@ def main(subject,portNo):
    thread.start()
    print("定期処理スタート")
    try:
+      with open("./recordDic_{subName}.bin".format(subName=subjectName),"rb") as rd:
+         recordDict = pickle.load(rd)
+      with open("./serialNumber_{subName}.bin".format(subName=subjectName),"rb") as rd:
+         serialNumber = pickle.load(rd)
+   except FileNotFoundError:
+      pass
+   try:
       app.run(threaded = False,debug=False,host="0.0.0.0", port=portNo)
    except KeyboardInterrupt:
       print("サーバー終了中",file=sys.stderr)
       #ここに終了処理
    finally:
+      with open("./recordDic_{subName}.bin".format(subName=subjectName),"wb") as rd:
+         pickle.dump(recordDict,rd)
+      with open("./serialNumber_{subName}.bin".format(subName=subjectName),"wb") as rd:
+         pickle.dump(serialNumber,rd)
       print("サーバ終了",file=sys.stderr)
 
 @app.after_request
