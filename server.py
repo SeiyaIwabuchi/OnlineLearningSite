@@ -545,9 +545,9 @@ def main(subject,portNo):
    thread.start()
    print("定期処理スタート")
    try:
-      with open("./recordDic.bin","rb") as rd:
+      with open("./recordDic_{subName}.bin".format(subName=subjectName),"rb") as rd:
          recordDict = pickle.load(rd)
-      with open("./serialNumber.bin","rb") as rd:
+      with open("./serialNumber_{subName}.bin".format(subName=subjectName),"rb") as rd:
          serialNumber = pickle.load(rd)
    except FileNotFoundError:
       pass
@@ -557,9 +557,9 @@ def main(subject,portNo):
       print("サーバー終了中",file=sys.stderr)
       #ここに終了処理
    finally:
-      with open("./recordDic.bin","wb") as rd:
+      with open("./recordDic_{subName}.bin".format(subName=subjectName),"wb") as rd:
          pickle.dump(recordDict,rd)
-      with open("./serialNumber.bin","wb") as rd:
+      with open("./serialNumber_{subName}.bin".format(subName=subjectName),"wb") as rd:
          pickle.dump(serialNumber,rd)
       print("サーバ終了",file=sys.stderr)
 
