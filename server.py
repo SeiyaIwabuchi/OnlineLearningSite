@@ -11,7 +11,6 @@ import hashlib
 import sys
 import random
 import math
-import pickle
 
 #serverDmain
 serverAddress = "iwabuchi.ddns.net"
@@ -99,7 +98,6 @@ class RecordData():
          self.problemNumberList[i] = self.problemNumberList[j]
          self.problemNumberList[j] = swap
          i = (i - 1)
-      self.problemNumberList.append(len(problems))
 
 #URL
 URL_root = "/"
@@ -259,7 +257,7 @@ def receiveAnswer():
    radioRes = []
    sessionID = request.cookies.get(Session.sessionID,None)
    probNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
-   oldProbNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
+   oldProbNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers-1]
 
    for i in range(4):
       radioRes.append(request.json['radio%d'%(i+1)])
@@ -267,14 +265,13 @@ def receiveAnswer():
    recordDict[sessionID].answers.append(raidoRes2Number(radioRes))
    RorW = judgment(probNum,recordDict[sessionID].answers[len(recordDict[sessionID].answers)-1])
    recordDict[sessionID].totalAnswers += 1
-   probNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
    recordDict[sessionID].lastAccessTime = datetime.datetime.today()
    if RorW:
       recordDict[sessionID].correctAnswers += 1
-      recordDict[sessionID].correctNumber.append(recordDict[str(sessionID)].totalAnswers-1)
+      recordDict[sessionID].correctNumber.append(recordDict[sessionID].totalAnswers-1)
    else:
       recordDict[sessionID].wrongAnswers += 1
-      recordDict[sessionID].wrongNumber.append(recordDict[str(sessionID)].totalAnswers-1)
+      recordDict[sessionID].wrongNumber.append(recordDict[sessionID].totalAnswers-1)
 
    return_data = {
       "RorW":RorW,
@@ -533,8 +530,6 @@ def getMainMenu():
 def main(subject,portNo):
    global problemsFilePath
    global subjectName
-   global recordDict
-   global serialNumber
    print("{subName}:サーバー起動".format(subName=subject))
    subjectName=subject
    problemsFilePath = problemsFilePath.format(subjectName=subjectName)
@@ -545,22 +540,11 @@ def main(subject,portNo):
    thread.start()
    print("定期処理スタート")
    try:
-      with open("./recordDic.bin","rb") as rd:
-         recordDict = pickle.load(rd)
-      with open("./serialNumber.bin","rb") as rd:
-         serialNumber = pickle.load(rd)
-   except FileNotFoundError:
-      pass
-   try:
       app.run(threaded = False,debug=False,host="0.0.0.0", port=portNo)
    except KeyboardInterrupt:
       print("サーバー終了中",file=sys.stderr)
       #ここに終了処理
    finally:
-      with open("./recordDic.bin","wb") as rd:
-         pickle.dump(recordDict,rd)
-      with open("./serialNumber.bin","wb") as rd:
-         pickle.dump(serialNumber,rd)
       print("サーバ終了",file=sys.stderr)
 
 @app.after_request
