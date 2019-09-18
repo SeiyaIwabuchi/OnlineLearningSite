@@ -90,7 +90,6 @@ class RecordData():
       for i in range(len(problems)):
          self.problemNumberList.append(i)
    def shuffle(self):
-      self.normalSequence()
       i = len(problems) - 1
       while (i > 0):
          j = math.floor(random.random() * (i + 1))
@@ -256,14 +255,12 @@ def index():
 def receiveAnswer():
    radioRes = []
    sessionID = request.cookies.get(Session.sessionID,None)
-   probNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
-   oldProbNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers-1]
 
    for i in range(4):
       radioRes.append(request.json['radio%d'%(i+1)])
 
    recordDict[sessionID].answers.append(raidoRes2Number(radioRes))
-   RorW = judgment(probNum,recordDict[sessionID].answers[len(recordDict[sessionID].answers)-1])
+   RorW = judgment(recordDict[sessionID].recordDict[sessionID].totalAnswers,recordDict[sessionID].answers[len(recordDict[sessionID].answers)-1])
    recordDict[sessionID].totalAnswers += 1
    recordDict[sessionID].lastAccessTime = datetime.datetime.today()
    if RorW:
@@ -275,8 +272,8 @@ def receiveAnswer():
 
    return_data = {
       "RorW":RorW,
-      "correct":problems[oldProbNum]["選択肢" + problems[oldProbNum]["正答"]],
-      "comment":problems[oldProbNum]["解説"] if problems[oldProbNum]["解説"] != "" else "特になし"
+      "correct":problems[recordDict[sessionID].totalAnswers-1]["選択肢" + problems[recordDict[sessionID].totalAnswers-1]["正答"]],
+      "comment":problems[recordDict[sessionID].totalAnswers-1]["解説"] if problems[recordDict[sessionID].totalAnswers-1]["解説"] != "" else "特になし"
       }
    return jsonify(ResultSet=json.dumps(return_data))
 
@@ -285,8 +282,8 @@ def receiveAnswer():
 def nextPoroblem():
    #サーバー側では問題jsonの組み立てを行う
    sessionID = request.cookies.get(Session.sessionID,None)
+   probNum = recordDict[sessionID].totalAnswers
    try:
-      probNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
       problemJson = {
          "problem":problems[probNum]["問題"],
          "choice1":problems[probNum]["選択肢1"],
@@ -331,9 +328,8 @@ def setResult():
       "
       tdTagTmp = "<td>{rdText}</td>\n"
       htmlResultTable = ""
-      for i in range(recordDict[sessionID].totalAnswers):
-         probNum = recordDict[sessionID].problemNumberList[i]
-         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = problems[probNum]["問題"]) + tdTagTmp.format(rdText = problems[probNum]["選択肢" + str(recordDict[sessionID].answers[i]+1)]) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
+      for i in range(resultData[0]): #resultData[0]は回答した問題数。
+         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = problems[i]["問題"]) + tdTagTmp.format(rdText = problems[i]["選択肢" + str(recordDict[sessionID].answers[i]+1)]) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
       with open(resultSourcePath,'r',encoding="utf-8_sig") as htso:
          htmlSource = htso.read().format(
             sID = sessionID,
