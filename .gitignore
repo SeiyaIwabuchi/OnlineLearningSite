@@ -2,3 +2,5 @@
 /log/
 *.json
 ./__pycache__
+*.bin
+test.py

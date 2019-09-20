@@ -43,7 +43,8 @@
               <button id="next" class="btn btn-default">次の問題</button>
               <br>
               <br>
-              <input type="button" class="btn btn-default" onclick="window.open('/ProblemList.html','_blank')" value="問題一覧を見る">
+              <input type="button" class="btn btn-default" onclick="location.href='/deleteRecord'" value="最初から始める">
+              <input type="button" class="btn btn-default" onclick="location.href='/ProblemList.html'" value="問題一覧を見る">
               <button id="getMyResult" class="btn btn-default">途中結果を見る</button>
             </div>
             <br>
@@ -52,13 +53,12 @@
       <div id="footer">
         <h6 id="sessionID">{sessionID}</h6>
         <h6>テスト環境で動作中</h6>
-        <h6>ブラウザバッグすると進捗はすべて消えます。途中から再開とかできないです。
-          <br>問題一覧は別タブに開くようにしました。
-          <br>サーバーが更新されたときに進捗が全部飛んでしまうのはお許しください。。。
+        <h6>cookieを利用してセッション維持できるようにしたのでcookieを有効にしておいてください。
+          <br>ブラウザバックは使用しないでください。使ったときはリロードすると進捗が復元されます。
+          <br>進捗は教科ごとに最終アクセスから1時間保持されるようになっています。
         </h6>
         <div id="menu">
-          <input type="button" class="btn btn-default" onclick="window.open('http://{dom}/mainmenu','_blank')" value="メニュー">
-          <input type="button" class="btn btn-default" onclick="window.open('/login','_blank')" value="ログイン">
+          <input type="button" class="btn btn-default" onclick="location.href='http://{dom}/mainmenu'" value="メニュー">
         </div>
       </div>
     </div>

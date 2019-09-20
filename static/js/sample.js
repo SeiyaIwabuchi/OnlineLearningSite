@@ -6,15 +6,12 @@ function init() {
   $("#next").hide();
   $("#Comment").hide();
   $("#解説").hide();
-  var probNum = 0;
   $("#ansButton").click(function() {
     var textData = JSON.stringify(
       { "radio1":$("input[name=rad]:checked").val() === "1",
         "radio2":$("input[name=rad]:checked").val() === "2",
         "radio3":$("input[name=rad]:checked").val() === "3",
-        "radio4":$("input[name=rad]:checked").val() === "4",
-        "sessionID":$("#sessionID").text(),
-        "probNum":probNum
+        "radio4":$("input[name=rad]:checked").val() === "4"
       });
     var answered = false;
     if( $("input[name=rad]:checked").val() == "1" || 
@@ -56,10 +53,7 @@ function init() {
     return false;
   });
   $("#next").click(function() {
-    probNum = probNum + 1;
-    var textData = JSON.stringify({
-      "requestProblem":probNum
-    });
+    var textData = "";
     $.ajax({
       type:'POST',
       url:'/nextPoroblem',
@@ -89,12 +83,12 @@ function init() {
           $("#radio4").prop('checked', false);
           $("input:[name=rad]").attr("checked",false);
         }else{
-          window.location.href = "/result/" + $("#sessionID").text();
+          window.location.href = "/result";
         }
       }
     });
   });
   $("#getMyResult").click(function(){
-    window.open("/result/" + $("#sessionID").text(),"_blank");
+    window.location.href = "/result";
   });
 }

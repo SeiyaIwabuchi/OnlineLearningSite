@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from flask import Flask, render_template
+from flask import Flask, render_template, make_response
 from flask import request, jsonify
 import json
 import threading
@@ -9,12 +9,30 @@ import datetime
 import time
 import hashlib
 import sys
+import random
+import math
+import pickle
+import socket
 
 #serverDmain
 serverAddress = "iwabuchi.ddns.net"
 
+#portNum
+portNum = None
+
+#domainToIpDict
+dTi = {}
+
+#問題更新日時
+problemUpdateTime = datetime.datetime.now()
+
 #debugMode
 isLocalhost = False
+
+#sessionクラス
+class Session:
+   NoSession = "NoSession"
+   sessionID = "sessionID"
 
 #ログインセッションデータセット
 class LoginDataSet():
@@ -33,15 +51,18 @@ class RecordData():
       self.correctNumber = []
       self.wrongNumber = []
       self.lastAccessTime = datetime.datetime.today()
-      self.remoteIP = object()
+      self.remoteIP = ""
       self.answers = []
+      self.problemNumberList = [] #出題する問題の並びを制御する
+      self.shuffle()
+      self.cookieCreateTime = datetime.datetime.now()
    def getStatistics(self):
       data = [
          self.totalAnswers,
          self.correctAnswers,
          self.wrongAnswers,
          self.correctAnswers / self.totalAnswers,
-         self.wrongAnswers / self.totalAnswers
+         self.totalAnswers / len(problems)
          ]
       return data
    #引数に指定された問題番号の正誤を返す
@@ -77,12 +98,25 @@ class RecordData():
             res.append(True)
       #print(res)
       return res[probNum]
+   def normalSequence(self):
+      for i in range(len(problems)):
+         self.problemNumberList.append(i)
+   def shuffle(self):
+      self.normalSequence()
+      i = len(problems) - 1
+      while (i > 0):
+         j = math.floor(random.random() * (i + 1))
+         swap = self.problemNumberList[i]
+         self.problemNumberList[i] = self.problemNumberList[j]
+         self.problemNumberList[j] = swap
+         i = (i - 1)
+      self.problemNumberList.append(len(problems))
 
 #URL
 URL_root = "/"
 URL_answerRequest = URL_root + "postText"
 URL_nextProblem = URL_root + "nextPoroblem"
-URL_result = URL_root + "result/<sessionID>"
+URL_result = URL_root + "result"
 URL_ProblemList = URL_root + "ProblemList.html"
 URL_admin = URL_root + "admin.html/<hashedValue>"
 URL_upProblem = URL_root + "upProblem"
@@ -90,6 +124,8 @@ URL_login = URL_root + "login"
 URL_auth = URL_root + "auth"
 URL_deleteAdminURL = URL_root + "deleteAdminURL/<palmt>"
 URL_mainMenu = URL_root + "mainmenu"
+URL_deleteRecord = URL_root + "deleteRecord"
+URL_updateCookie = URL_root + "updateCookie"
 
 #HTML Source path
 htmlSourcePath = "./index.html"
@@ -105,7 +141,7 @@ loginLogPath = "./log/login_{name}_{subName}.log"
 
 #time
 scanInterval = 60 * 60 #秒指定 定期処理タイマー
-liveLimit = 60 * 60 #秒指定
+liveLimit = 60 * 60  * 24 * 120 #秒指定
 
 #サーバーインスタンス
 app = Flask(__name__,template_folder="./")
@@ -144,11 +180,14 @@ serialNumber = 0
 #問題データ読み込み
 def loadproblemsFromJson():
    global problems
+   global problemUpdateTime
    try:
       with open(problemsFilePath,"r",encoding="utf-8_sig") as prob:
          problems = json.load(prob)
       checkProblems()
       print("問題に問題はありませんでした。")
+      problemUpdateTime = datetime.datetime.now()
+      print(problemUpdateTime)
       return True,""
    except ProblemError:
       print("問題に問題がありました。",file=sys.stderr)
@@ -171,22 +210,26 @@ class ProblemError(Exception):
 
 #htmlに問題データを乗せる(最初だけ)
 def problemWritingToHtml(problemNum,htmlSource,sessionID):
-   tmpDict = problems[problemNum]
-   #print(tmpDict)
-   htmlSource = htmlSource.format(
-      problem = tmpDict["問題"],
-      choices1 = tmpDict["選択肢1"],
-      choices2 = tmpDict["選択肢2"],
-      choices3 = tmpDict["選択肢3"],
-      choices4 = tmpDict["選択肢4"],
-      RorW = "",
-      correct = "",
-      sessionID = str(sessionID),
-      comment = "",
-      subName=subjectName,
-      dom= "localhost" if isLocalhost else serverAddress
-      )
-   return htmlSource
+   try:
+      tmpDict = problems[problemNum]
+      #print(tmpDict)
+      htmlSource = htmlSource.format(
+         problem = tmpDict["問題"],
+         choices1 = tmpDict["選択肢1"],
+         choices2 = tmpDict["選択肢2"],
+         choices3 = tmpDict["選択肢3"],
+         choices4 = tmpDict["選択肢4"],
+         RorW = "",
+         correct = "",
+         sessionID = str(sessionID),
+         comment = "",
+         subName=subjectName,
+         dom= "localhost" if isLocalhost else serverAddress
+         )
+      return htmlSource
+   except IndexError:
+      return "<script> location.href='/result'; </script>"
+   
 
 def raidoRes2Number(radioRes):
    for index,b in enumerate(radioRes):
@@ -202,41 +245,74 @@ def judgment(problemNum,choice):
 
 @app.route(URL_root)
 def index():
-   sessionID = searchForFree(recordDict)
-   recordDict[str(sessionID)] = RecordData()
+   if not (request.remote_addr in dTi.keys()):
+      dTi[request.remote_addr] = reverse_lookup(request.remote_addr)
+   else:
+      print("Access from : ",end="")
+      print(dTi[request.remote_addr] if dTi[request.remote_addr] != False else request.remote_addr,end=" ,IP : ")
+      print(request.remote_addr)
+   sessionID = request.cookies.get(Session.sessionID,Session.NoSession)
+   if sessionID == Session.NoSession or not (sessionID in recordDict.keys()):
+      #新規ユーザーへの処理
+      print("new user")
+      sessionID = searchForFree(recordDict)
+      recordDict[str(sessionID)] = RecordData()
+   elif recordDict[sessionID].cookieCreateTime < problemUpdateTime: #念のために10秒進める。
+      print("old user")
+      sdkjs = """問題が更新されました。\\n新しい問題を回答しますか？\\n(新しい問題に切り替えると進捗がすべて消えます。\\n現在の回答終了後に「最初から始める」から更新後の問題を解くことができます。)""".encode("shift_jis").decode("shift_jis")
+      return "\
+         <script>\
+            if(window.confirm(\""+sdkjs+"\")){\
+               location.href = '/deleteRecord'\
+            }else{\
+               location.href = '/updateCookie'\
+            }\
+         </script>\
+      "
+   #ロギング
    recordDict[str(sessionID)].remoteIP = request.remote_addr
    logList.append(request.remote_addr)
+
+   probNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
+
+   #クライアントへの返答
    with open(htmlSourcePath,'r',encoding="utf-8_sig") as htso:
-      #htmlSource = htso.read().format(sessionID = int(sessions[len(sessions)-1]))
       htmlSource = htso.read()
-      htmlSource = problemWritingToHtml(0,htmlSource,sessionID)
-   return htmlSource
+      htmlSource = problemWritingToHtml(probNum,htmlSource,sessionID)
+      response = make_response(htmlSource)
+      # Cookieの設定を行う
+      max_age = liveLimit
+      expires = int(datetime.datetime.now().timestamp()) + max_age
+      response.set_cookie(Session.sessionID, value=str(sessionID), max_age=max_age, expires=expires, path='/', secure=None, httponly=False)
+   return response
 
 #回答するを押したときの動作
 @app.route(URL_answerRequest, methods=['POST'])
 def receiveAnswer():
    radioRes = []
+   sessionID = request.cookies.get(Session.sessionID,None)
+   probNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
+   oldProbNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
+
    for i in range(4):
       radioRes.append(request.json['radio%d'%(i+1)])
-   #print("sessionID : " + request.json["sessionID"],end=" ")
-   #print("SelecedNumber : " + str(raidoRes2Number(radioRes)),end="")
-   #print("problemNumber : " + str(request.json["probNum"]))
 
-   recordDict[request.json["sessionID"]].answers.append(raidoRes2Number(radioRes))
-   RorW = judgment(request.json["probNum"],recordDict[request.json["sessionID"]].answers[len(recordDict[request.json["sessionID"]].answers)-1])
-   recordDict[request.json["sessionID"]].totalAnswers += 1
-   recordDict[request.json["sessionID"]].lastAccessTime = datetime.datetime.today()
+   recordDict[sessionID].answers.append(raidoRes2Number(radioRes))
+   RorW = judgment(probNum,recordDict[sessionID].answers[len(recordDict[sessionID].answers)-1])
+   recordDict[sessionID].totalAnswers += 1
+   probNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
+   recordDict[sessionID].lastAccessTime = datetime.datetime.today()
    if RorW:
-      recordDict[request.json["sessionID"]].correctAnswers += 1
-      recordDict[request.json["sessionID"]].correctNumber.append(int(request.json["probNum"]))
+      recordDict[sessionID].correctAnswers += 1
+      recordDict[sessionID].correctNumber.append(recordDict[str(sessionID)].totalAnswers-1)
    else:
-      recordDict[request.json["sessionID"]].wrongAnswers += 1
-      recordDict[request.json["sessionID"]].wrongNumber.append(int(request.json["probNum"]))
+      recordDict[sessionID].wrongAnswers += 1
+      recordDict[sessionID].wrongNumber.append(recordDict[str(sessionID)].totalAnswers-1)
 
    return_data = {
       "RorW":RorW,
-      "correct":problems[int(request.json["probNum"])]["選択肢" + problems[int(request.json["probNum"])]["正答"]],
-      "comment":problems[int(request.json["probNum"])]["解説"] if problems[int(request.json["probNum"])]["解説"] != "" else "特になし"
+      "correct":problems[oldProbNum]["選択肢" + problems[oldProbNum]["正答"]],
+      "comment":problems[oldProbNum]["解説"] if problems[oldProbNum]["解説"] != "" else "特になし"
       }
    return jsonify(ResultSet=json.dumps(return_data))
 
@@ -244,8 +320,9 @@ def receiveAnswer():
 @app.route(URL_nextProblem, methods=['POST'])
 def nextPoroblem():
    #サーバー側では問題jsonの組み立てを行う
-   probNum = request.json["requestProblem"]
+   sessionID = request.cookies.get(Session.sessionID,None)
    try:
+      probNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
       problemJson = {
          "problem":problems[probNum]["問題"],
          "choice1":problems[probNum]["選択肢1"],
@@ -279,7 +356,8 @@ data = [
          ]
 """
 @app.route(URL_result)
-def setResult(sessionID=None):
+def setResult():
+   sessionID = request.cookies.get(Session.sessionID,None)
    try:
       resultData = recordDict[sessionID].getStatistics()
       resultHtmlTmp = "\
@@ -289,19 +367,17 @@ def setResult(sessionID=None):
       "
       tdTagTmp = "<td>{rdText}</td>\n"
       htmlResultTable = ""
-      #print("SessionID : " + sessionID)
-      #print(recordDict[sessionID].correctNumber)
-      #print(recordDict[sessionID].wrongNumber)
-      for i in range(resultData[0]): #resultData[0]は回答した問題数。
-         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = problems[i]["問題"]) + tdTagTmp.format(rdText = problems[i]["選択肢" + str(recordDict[sessionID].answers[i]+1)]) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
+      for i in range(recordDict[sessionID].totalAnswers):
+         probNum = recordDict[sessionID].problemNumberList[i]
+         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = problems[probNum]["問題"]) + tdTagTmp.format(rdText = problems[probNum]["選択肢" + str(recordDict[sessionID].answers[i]+1)]) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
       with open(resultSourcePath,'r',encoding="utf-8_sig") as htso:
          htmlSource = htso.read().format(
             sID = sessionID,
             probNum = resultData[0],
             corrNum = resultData[1],
             wrongNum = resultData[2],
-            corrRate = str(float(resultData[3])*100) + "%",
-            wrongRate = str(float(resultData[4])*100) + "%",
+            corrRate = str(float(resultData[3])*100)[:5] + "%",
+            wrongRate = str(float(resultData[4])*100)[:5] + "%",
             resultTable = resultHtmlTmp.format(trText = htmlResultTable),
             subName=subjectName,
             dom= "localhost" if isLocalhost else serverAddress
@@ -398,7 +474,7 @@ def auth():
    print(retJson)
    loginLogList.append(createLoginLogDict(
       datetime.datetime.now(),\
-      request.remote_addr,\
+      dTi[request.remote_addr] if dTi[request.remote_addr] != False else request.remote_addr,\
       request.json["loginID"],\
       request.json["pass"],\
       False if retJson["Result"] == "False" else True,\
@@ -426,9 +502,9 @@ def organize():
       #{IPアドレス:回数}の形式で保存したい
       for ipAddr in logList:
          if ipAddr in tmpDict:
-            tmpDict[ipAddr] += 1
+            tmpDict[dTi[ipAddr] if dTi[ipAddr] != False else ipAddr] += 1
          else:
-            tmpDict[ipAddr] = 1
+            tmpDict[dTi[ipAddr] if dTi[ipAddr] != False else ipAddr] = 1
       #クリア
       logList.clear()
       #保存用テキスト
@@ -490,6 +566,10 @@ def getMainMenu():
 def main(subject,portNo):
    global problemsFilePath
    global subjectName
+   global recordDict
+   global serialNumber
+   global portNum
+   portNum = portNo
    print("{subName}:サーバー起動".format(subName=subject))
    subjectName=subject
    problemsFilePath = problemsFilePath.format(subjectName=subjectName)
@@ -500,17 +580,69 @@ def main(subject,portNo):
    thread.start()
    print("定期処理スタート")
    try:
-      app.run(threaded = False,debug=False,host="0.0.0.0", port=portNo)
+      with open("./recordDic_{subName}.bin".format(subName=subjectName),"rb") as rd:
+         recordDict = pickle.load(rd)
+      with open("./serialNumber_{subName}.bin".format(subName=subjectName),"rb") as rd:
+         serialNumber = pickle.load(rd)
+   except FileNotFoundError:
+      pass
+   try:
+      app.run(threaded = True,debug=False,host="0.0.0.0", port=portNo)
    except KeyboardInterrupt:
       print("サーバー終了中",file=sys.stderr)
       #ここに終了処理
    finally:
+      with open("./recordDic_{subName}.bin".format(subName=subjectName),"wb") as rd:
+         pickle.dump(recordDict,rd)
+      with open("./serialNumber_{subName}.bin".format(subName=subjectName),"wb") as rd:
+         pickle.dump(serialNumber,rd)
       print("サーバ終了",file=sys.stderr)
+
+@app.after_request
+def add_header(r):
+   """
+   Add headers to both force latest IE rendering engine or Chrome Frame,
+   and also to cache the rendered page for 10 minutes.
+   """
+   r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+   r.headers["Pragma"] = "no-cache"
+   r.headers["Expires"] = "0"
+   r.headers['Cache-Control'] = 'public, max-age=0'
+   return r
+
+@app.route(URL_deleteRecord)
+def deleteRecord():
+   global recordDict
+   sessionID = request.cookies.get(Session.sessionID,None)
+   recordDict[sessionID] = RecordData()
+   return "<script> location.href='/' </script>"
+
+@app.route("/test")
+def testFunc():
+   sessionID = request.cookies.get(Session.sessionID,None)
+   recordDict[sessionID].normalSequence()
+   print(recordDict[sessionID].problemNumberList)
+   recordDict[sessionID].shuffle()
+   print(recordDict[sessionID].problemNumberList)
+   return "レスポンス"
+
+@app.route(URL_updateCookie)
+def updateCookie():
+   global recordDict
+   sessionID = request.cookies.get(Session.sessionID,None)
+   recordDict[sessionID].cookieCreateTime = datetime.datetime.now()
+   return "<script> location.href='/' </script>"
+
+def reverse_lookup(ip):
+	try:
+		return socket.gethostbyaddr(str(ip))[0]
+	except:
+		return False
 
 if __name__ == '__main__':
    args = sys.argv
    if len(args) < 3:
-      print("コマンドライン引数が不足しています。",file=sys.stderr)
+      print("コマンドライン引数が不足しています。第1引数に教科名,第2引数にポートを指定してください。",file=sys.stderr)
    elif len(args) > 4:
       print("コマンドライン引数が多すぎます。",file=sys.stderr)
    main(args[1],int(args[2]))

@@ -11,9 +11,16 @@ import hashlib
 from subprocess import Popen,PIPE
 import traceback
 import os
+import socket
 
 #serverDmain
 serverAddress = "iwabuchi.ddns.net"
+
+#port番号
+portNum = None
+
+#domainToIpDict
+dTi = {}
 
 #debugMode
 isLocalhost = False
@@ -170,6 +177,11 @@ subjectListTemp = """\t<button onclick="location.href='{URL}'" class="btn btn-de
 #メインメニュー表示メソッド
 @app.route(URL_mainMenu)
 def getMainMenu():
+    if not (request.remote_addr in dTi.keys()):
+        dTi[request.remote_addr] = reverse_lookup(request.remote_addr)
+    print("Access from : ",end="")
+    print(dTi[request.remote_addr] if dTi[request.remote_addr] != False else request.remote_addr)
+
     sessionID = searchForFree(recordDict)
     recordDict[str(sessionID)] = RecordData()
     recordDict[str(sessionID)].remoteIP = request.remote_addr
@@ -181,6 +193,10 @@ def getMainMenu():
     with open(mainMenuHtmlPath,'r',encoding="utf-8_sig") as htso:
         htmlSource = htso.read().format(buttons=subjectListHtml)
     return htmlSource
+
+@app.route("/")
+def redirectToMainmenu():
+   return "<script> location.href='/mainmenu'</script>"
 
 #サーバー追加用メソッド
 @app.route(URL_addSubject)
@@ -205,6 +221,12 @@ def searchForFree(dic):
     while str(genKey) in rKeys:
         genKey += 1
     return genKey
+
+def reverse_lookup(ip):
+    try:
+	    return socket.gethostbyaddr(str(ip))[0]
+    except:
+       return False
 
 
 if __name__ == '__main__':
