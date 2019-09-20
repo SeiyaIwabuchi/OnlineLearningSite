@@ -12,11 +12,16 @@ import sys
 import random
 import math
 import pickle
+import socket
 
 #serverDmain
 serverAddress = "iwabuchi.ddns.net"
+
 #portNum
 portNum = None
+
+#domainToIpDict
+dTi = {}
 
 #問題更新日時
 problemUpdateTime = datetime.datetime.now()
@@ -46,7 +51,7 @@ class RecordData():
       self.correctNumber = []
       self.wrongNumber = []
       self.lastAccessTime = datetime.datetime.today()
-      self.remoteIP = object()
+      self.remoteIP = ""
       self.answers = []
       self.problemNumberList = [] #出題する問題の並びを制御する
       self.shuffle()
@@ -240,6 +245,12 @@ def judgment(problemNum,choice):
 
 @app.route(URL_root)
 def index():
+   if not (request.remote_addr in dTi.keys()):
+      dTi[request.remote_addr] = reverse_lookup(request.remote_addr)
+   else:
+      print("Access from : ",end="")
+      print(dTi[request.remote_addr] if dTi[request.remote_addr] != False else request.remote_addr,end=" ,IP : ")
+      print(request.remote_addr)
    sessionID = request.cookies.get(Session.sessionID,Session.NoSession)
    if sessionID == Session.NoSession or not (sessionID in recordDict.keys()):
       #新規ユーザーへの処理
@@ -258,7 +269,6 @@ def index():
             }\
          </script>\
       "
-   print(recordDict[sessionID].cookieCreateTime - problemUpdateTime)
    #ロギング
    recordDict[str(sessionID)].remoteIP = request.remote_addr
    logList.append(request.remote_addr)
@@ -366,8 +376,8 @@ def setResult():
             probNum = resultData[0],
             corrNum = resultData[1],
             wrongNum = resultData[2],
-            corrRate = str(float(resultData[3])*100) + "%",
-            wrongRate = str(float(resultData[4])*100) + "%",
+            corrRate = str(float(resultData[3])*100)[:5] + "%",
+            wrongRate = str(float(resultData[4])*100)[:5] + "%",
             resultTable = resultHtmlTmp.format(trText = htmlResultTable),
             subName=subjectName,
             dom= "localhost" if isLocalhost else serverAddress
@@ -464,7 +474,7 @@ def auth():
    print(retJson)
    loginLogList.append(createLoginLogDict(
       datetime.datetime.now(),\
-      request.remote_addr,\
+      dTi[request.remote_addr] if dTi[request.remote_addr] != False else request.remote_addr,\
       request.json["loginID"],\
       request.json["pass"],\
       False if retJson["Result"] == "False" else True,\
@@ -492,9 +502,9 @@ def organize():
       #{IPアドレス:回数}の形式で保存したい
       for ipAddr in logList:
          if ipAddr in tmpDict:
-            tmpDict[ipAddr] += 1
+            tmpDict[dTi[ipAddr] if dTi[ipAddr] != False else ipAddr] += 1
          else:
-            tmpDict[ipAddr] = 1
+            tmpDict[dTi[ipAddr] if dTi[ipAddr] != False else ipAddr] = 1
       #クリア
       logList.clear()
       #保存用テキスト
@@ -622,6 +632,12 @@ def updateCookie():
    sessionID = request.cookies.get(Session.sessionID,None)
    recordDict[sessionID].cookieCreateTime = datetime.datetime.now()
    return "<script> location.href='/' </script>"
+
+def reverse_lookup(ip):
+	try:
+		return socket.gethostbyaddr(str(ip))[0]
+	except:
+		return False
 
 if __name__ == '__main__':
    args = sys.argv
