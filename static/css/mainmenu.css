@@ -43,6 +43,11 @@
 	#menu ul {
 	  list-style: none;
 	}
+	#sideBySide {
+	    display: flex;
+	    justify-content:space-around;
+	    flex-wrap: nowrap;
+	}
   }
   @media screen and (max-width: 479px) { /*ウィンドウ幅が767px以上の場合に適用*/
 	#wrapper {
@@ -74,6 +79,11 @@
 	}
 	#menu ul {
 	  list-style: none;
+	}
+	 #sideBySide {
+	     display: flex;
+	     justify-content:space-around;
+	     flex-wrap: nowrap;
 	}
 	img{
 	  width:100%;

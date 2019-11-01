@@ -54,6 +54,7 @@ function init() {
   });
   $("#next").click(function() {
     var textData = "";
+    $("#notetext").val("");
     $.ajax({
       type:'POST',
       url:'/nextPoroblem',
