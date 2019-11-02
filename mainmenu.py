@@ -172,7 +172,7 @@ def organize():
         with open(logPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today())),mode="w") as l:
             l.write(logText)
 
-subjectListTemp = """\t<button onclick="location.href='{URL}'" class="btn btn-default">{subName}</button>"""
+subjectListTemp = """\t<tr>\n\t<td>{subName}</td>\n\t<td align="right"><button onclick="location.href='{URL}'" class="btn btn-default">開始</button></td>\n</tr>"""
 
 #メインメニュー表示メソッド
 @app.route(URL_mainMenu)
@@ -189,7 +189,7 @@ def getMainMenu():
     subjectListHtml = ""
     for subName,subURL in subjectList.items():
         subjectListHtml += subjectListTemp.format(URL="http://" + subURL,subName=subName) + "\n"
-    subjectListHtml += "<br>" + subjectListTemp.format(URL=URL_addSubject,subName="教科更新") + "\n"
+    subjectListHtml += subjectListTemp.format(URL=URL_addSubject,subName="教科更新") + "\n"
     with open(mainMenuHtmlPath,'r',encoding="utf-8_sig") as htso:
         htmlSource = htso.read().format(buttons=subjectListHtml)
     return htmlSource
