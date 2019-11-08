@@ -7,6 +7,7 @@ function init() {
   $("#Comment").hide();
   $("#解説").hide();
   $("#loadingGif").hide();
+  $("#ansButton").show();
   $("#ansButton").click(function() {
     var textData = JSON.stringify(
       { "radio1":$("input[name=rad]:checked").val() === "1",
@@ -25,6 +26,7 @@ function init() {
     }
     if(answered){
       $("#loadingGif").show();
+      $("#ansButton").hide();
       $.ajax({
         type:'POST',
         url:'/postText',

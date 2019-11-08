@@ -51,6 +51,10 @@
     .radio input[type="radio"] + .radio-label:empty:before {
     margin-right: 0;
     }
+    .spinner-border{
+	margin-left: 50%;
+	margin-top: 4%;
+    }
 
   @media screen and (min-width: 767px) { /*ウィンドウ幅が767px以上の場合に適用*/
 	#wrapper {
