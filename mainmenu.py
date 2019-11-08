@@ -242,7 +242,9 @@ if __name__ == '__main__':
         for subName,subURL in subjectList.items():
             url = subURL.split(":")
             print("> {pycom} server.py {subName} {port}".format(pycom=pythonCommand,subName=subName,port=url[1]))
-            subServers.append(Popen([pythonCommand,"server.py",subName,url[1]],stdout=PIPE,stderr=PIPE))
+            with open("serverLog_{subName}_{port}.log".format(subName=subName,port=url[1]),"w") as logFile:
+                print("create File:serverLog_{subName}_{port}.log".format(subName=subName,port=url[1]))
+                subServers.append(Popen([pythonCommand,"server.py",subName,url[1]],stdout=logFile,stderr=logFile))
             startedServers.append(subName)
         app.run(threaded = True,debug=True,host="0.0.0.0", port=80)
     except KeyboardInterrupt:
