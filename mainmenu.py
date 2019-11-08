@@ -172,7 +172,7 @@ def organize():
         with open(logPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today())),mode="w") as l:
             l.write(logText)
 
-subjectListTemp = """\t<tr>\n\t<td>{subName}</td>\n\t<td align="right"><button onclick="location.href='{URL}'" class="btn btn-default" id="{subName2}">開始</button></td>\n</tr>"""
+subjectListTemp = """\t<tr>\n\t<td>{subName}</td>\n\t<td align="right"><button onclick="location.href='{URL}'" class="btn btn-secondary" id="{subName2}">開始</button></td>\n</tr>"""
 
 #メインメニュー表示メソッド
 @app.route(URL_mainMenu)
