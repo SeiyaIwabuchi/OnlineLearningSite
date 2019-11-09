@@ -36,7 +36,7 @@ function init() {
           //$("#hello").text(result);
           //判定がtrueだったら解説と正答は表示しない。
           var RorWMsg = "不正解";
-	  $("#loadingGif").hide();
+	        $("#loadingGif").hide();
           $("#next").show();
           $("#RorW").show();
           if(JSON.parse(data.ResultSet).RorW){
