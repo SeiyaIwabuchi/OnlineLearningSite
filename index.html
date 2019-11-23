@@ -6,16 +6,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
     <title>オンライン学習</title>
     <!-- Bootstrap CDN -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
-
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="../static/css/sample.css">
     <link rel="shortcut icon" href="../static/images/favicon.ico">
   </head>
   <body>
     <div id="wrapper">
       <div id="header">
-          <img src="../static/images/オンライン学習ヘッダ.jpg"
+	      <img src="../static/images/オンライン学習ヘッダ.jpg">
       </div>
       <div id="main">
           <div id="container-fluid">
@@ -27,28 +25,31 @@
               <h4 id="problem">{problem}</h4>
             </div>
 	    <h4>選択肢</h4>
-            <input type="radio" name="rad" value="1" id="radio1"><label id="radio1Label">{choices1}</label>
-            <br>
-            <input type="radio" name="rad" value="2" id="radio2"><label id="radio2Label">{choices2}</label>
-            <br>
-            <input type="radio" name="rad" value="3" id="radio3"><label id="radio3Label">{choices3}</label>
-            <br>
-            <input type="radio" name="rad" value="4" id="radio4"><label id="radio4Label">{choices4}</label>
-            <br>
+	    <div class="radio"><input type="radio" name="rad" value="1" id="radio1"><label for="radio1" id="radio1Label" class="radio-label">{choices1}</label></div>
+	    <br>
+	    <div class="radio"><input type="radio" name="rad" value="2" id="radio2"><label for="radio2" id="radio2Label" class="radio-label">{choices2}</label></div>
+	    <br>
+	    <div class="radio"><input type="radio" name="rad" value="3" id="radio3"><label for="radio3" id="radio3Label" class="radio-label">{choices3}</label></div>
+	    <br>
+	    <div class="radio"><input type="radio" name="rad" value="4" id="radio4"><label for="radio4" id="radio4Label" class="radio-label">{choices4}</label></div>
+	    <br>
 	    <input type="text" id="notetext"  class="form-control"/>
             <div id="menu">
-              <button id="ansButton" class="btn btn-default">回答する</button>
+              <button id="ansButton" class="btn btn-secondary">回答する</button>
+	      <div class="spinner-border" role="status" id="loadingGif">
+	        <span class="sr-only" id="loadingGif">Loading...</span>
+	      </div>
               <h4 id="RorW">{RorW}</h3>
               <h4 id="Correct">{correct}</h3>
               <h3 id="解説">解説</h3>
               <h4 id="Comment">{comment}</h3>
-              <button id="next" class="btn btn-default">次の問題</button>
+              <button id="next" class="btn btn-secondary">次の問題</button>
               <br>
               <br>
 	      <div id="sideBySide">
-              	<input type="button" class="btn btn-default" onclick="location.href='/deleteRecord'" value="最初から始める">
-              	<input type="button" class="btn btn-default" onclick="location.href='/ProblemList.html'" value="問題一覧を見る">
-              	<button id="getMyResult" class="btn btn-default">途中結果を見る</button>
+              	<input type="button" class="btn btn-secondary" onclick="location.href='/deleteRecord'" value="最初から始める">
+              	<input type="button" class="btn btn-secondary" onclick="location.href='/ProblemList.html'" value="問題一覧を見る">
+              	<button id="getMyResult" class="btn btn-secondary">途中結果を見る</button>
 	    </div>
             </div>
             <br>
@@ -62,12 +63,12 @@
           <br>進捗は教科ごとに最終アクセスから1時間保持されるようになっています。
         </h6>
         <div id="menu">
-          <input type="button" class="btn btn-default" onclick="location.href='http://{dom}/mainmenu'" value="メニュー">
+          <input type="button" class="btn btn-secondary" onclick="location.href='http://{dom}/mainmenu'" value="メニュー">
         </div>
       </div>
     </div>
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
       <script src="../static/js/sample.js"></script>
   </body>
-</html>

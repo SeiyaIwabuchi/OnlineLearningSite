@@ -172,7 +172,7 @@ def organize():
         with open(logPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today())),mode="w") as l:
             l.write(logText)
 
-subjectListTemp = """\t<button onclick="location.href='{URL}'" class="btn btn-default">{subName}</button>"""
+subjectListTemp = """\t<tr>\n\t<td>{subName}</td>\n\t<td align="right"><button onclick="location.href='{URL}'" class="btn btn-secondary" id="{subName2}">開始</button></td>\n</tr>"""
 
 #メインメニュー表示メソッド
 @app.route(URL_mainMenu)
@@ -188,8 +188,8 @@ def getMainMenu():
     logList.append(request.remote_addr)
     subjectListHtml = ""
     for subName,subURL in subjectList.items():
-        subjectListHtml += subjectListTemp.format(URL="http://" + subURL,subName=subName) + "\n"
-    subjectListHtml += "<br>" + subjectListTemp.format(URL=URL_addSubject,subName="教科更新") + "\n"
+        subjectListHtml += subjectListTemp.format(URL="http://" + subURL,subName=subName,subName2=subName) + "\n"
+    subjectListHtml += subjectListTemp.format(URL=URL_addSubject,subName="教科更新",subName2=subName) + "\n"
     with open(mainMenuHtmlPath,'r',encoding="utf-8_sig") as htso:
         htmlSource = htso.read().format(buttons=subjectListHtml)
     return htmlSource
@@ -242,9 +242,11 @@ if __name__ == '__main__':
         for subName,subURL in subjectList.items():
             url = subURL.split(":")
             print("> {pycom} server.py {subName} {port}".format(pycom=pythonCommand,subName=subName,port=url[1]))
-            subServers.append(Popen([pythonCommand,"server.py",subName,url[1]],stdout=PIPE,stderr=PIPE))
+            with open("serverLog_{subName}_{port}.log".format(subName=subName,port=url[1]),"w") as logFile:
+                print("create File:serverLog_{subName}_{port}.log".format(subName=subName,port=url[1]))
+                subServers.append(Popen([pythonCommand,"server.py",subName,url[1]],stdout=logFile,stderr=logFile))
             startedServers.append(subName)
-        app.run(threaded = True,debug=False,host="0.0.0.0", port=80)
+        app.run(threaded = True,debug=True,host="0.0.0.0", port=80)
     except KeyboardInterrupt:
         print("サーバー終了中")
         #ここに終了処理

@@ -6,6 +6,8 @@ function init() {
   $("#next").hide();
   $("#Comment").hide();
   $("#解説").hide();
+  $("#loadingGif").hide();
+  $("#ansButton").show();
   $("#ansButton").click(function() {
     var textData = JSON.stringify(
       { "radio1":$("input[name=rad]:checked").val() === "1",
@@ -23,6 +25,8 @@ function init() {
       answered = true;
     }
     if(answered){
+      $("#loadingGif").show();
+      $("#ansButton").hide();
       $.ajax({
         type:'POST',
         url:'/postText',
@@ -32,6 +36,7 @@ function init() {
           //$("#hello").text(result);
           //判定がtrueだったら解説と正答は表示しない。
           var RorWMsg = "不正解";
+	        $("#loadingGif").hide();
           $("#next").show();
           $("#RorW").show();
           if(JSON.parse(data.ResultSet).RorW){
@@ -45,7 +50,11 @@ function init() {
           $("#Correct").text("正答 : " + JSON.parse(data.ResultSet).correct);
           $("#Comment").text(JSON.parse(data.ResultSet).comment);
           $("#ansButton").hide();
-        }
+        },
+	error:function(XMLHttpRequest, textStatus, errorThrown){
+	    alert("HTT`ステータス:" + XMLHttpRequest.status  + "\nエラー内容:" + textStatus);
+	    location.reload();
+	}
       });
     }else{
       alert("必ず回答してください。");
