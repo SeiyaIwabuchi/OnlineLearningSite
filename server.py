@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask, render_template, make_response
-from flask import request, jsonify
+from flask import request, jsonify, send_file
 import json
 import threading
 import datetime
@@ -126,6 +126,7 @@ URL_deleteAdminURL = URL_root + "deleteAdminURL/<palmt>"
 URL_mainMenu = URL_root + "mainmenu"
 URL_deleteRecord = URL_root + "deleteRecord"
 URL_updateCookie = URL_root + "updateCookie"
+URL_problemJsonDownload = URL_root + "problemJsonDownload"
 
 #HTML Source path
 htmlSourcePath = "./index.html"
@@ -632,6 +633,10 @@ def updateCookie():
    sessionID = request.cookies.get(Session.sessionID,None)
    recordDict[sessionID].cookieCreateTime = datetime.datetime.now()
    return "<script> location.href='/' </script>"
+
+@app.route(URL_problemJsonDownload)
+def problemJsonDownload():
+   return send_file(problemsFilePath)
 
 def reverse_lookup(ip):
 	try:
