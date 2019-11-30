@@ -654,10 +654,10 @@ def onlyMistakes():
     sessionID = request.cookies.get(Session.sessionID,None)
     mistakeProb = ""
     tmpList = recordDict[str(sessionID)].problemNumberList.copy()
+    recordDict[str(sessionID)] = RecordData(shuffle=False)
     for Num in recordDict[str(sessionID)].wrongNumber:
-        recordDict[str(sessionID)].problemNumberList = tmpList[Num]
+        recordDict[str(sessionID)].problemNumberList.append(tmpList[Num])
         mistakeProb += problems[tmpList[Num]]["問題"] + "<br>"
-    recordDict[sessionID] = RecordData(shuffle=False)
     return "<script> location.href='/' </script>"
 
 if __name__ == '__main__':
