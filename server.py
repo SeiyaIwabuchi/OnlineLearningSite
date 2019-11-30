@@ -304,6 +304,7 @@ def receiveAnswer():
    recordDict[sessionID].lastAccessTime = datetime.datetime.today()
    if RorW:
       recordDict[sessionID].correctAnswers += 1
+      #回答した順番で格納する
       recordDict[sessionID].correctNumber.append(oldProbNum)
    else:
       recordDict[sessionID].wrongAnswers += 1
@@ -316,7 +317,7 @@ def receiveAnswer():
       }
    
    selectedNumber = recordDict[sessionID].answers[len(recordDict[sessionID].answers)-1]
-   print(f"sessionID:{sessionID},problemNumber:{oldProbNum},selected:{selectedNumber}")
+   print("sessionID:{},problemNumber:{},selected:{}")
    return jsonify(ResultSet=json.dumps(return_data))
 
 #次の問題をクリックされた時のメソッド
@@ -372,7 +373,7 @@ def setResult():
       htmlResultTable = ""
       for i in range(recordDict[sessionID].totalAnswers):
          probNum = recordDict[sessionID].problemNumberList[i]
-         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = problems[probNum]["問題"]) + tdTagTmp.format(rdText = problems[probNum]["選択肢" + str(recordDict[sessionID].answers[i]+1)]) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
+         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = problems[probNum]["問題"]) + tdTagTmp.format(rdText = problems[probNum]["選択肢" + str(recordDict[sessionID].answers[i]+1)]) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(probNum) == True else "×"))
       with open(resultSourcePath,'r',encoding="utf-8_sig") as htso:
          htmlSource = htso.read().format(
             sID = sessionID,
