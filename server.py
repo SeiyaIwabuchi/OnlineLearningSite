@@ -654,7 +654,10 @@ def onlyMistakes():
     for Num in tmpWrongList:
         recordDict[str(sessionID)].problemNumberList.append(tmpProbList[Num])
     #return "間違った問題数:" + str(len(tmpWrongList)) + ",次の問題リスト:" + str(recordDict[str(sessionID)].problemNumberList)
-    return "<script> location.href='/' </script>"
+    if len(recordDict[str(sessionID)].problemNumberList) > 0:
+        return "<script> location.href='/' </script>"
+    else:
+        return "<script> alert('間違った問題はありません。'); window.location.href='/deleteRecord'; </script>";
 
 if __name__ == '__main__':
    args = sys.argv
