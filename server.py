@@ -654,7 +654,7 @@ def onlyMistakes():
     recordDict[str(sessionID)] = RecordData(shuffle=False)
     for Num in tmpWrongList:
         recordDict[str(sessionID)].problemNumberList.append(tmpProbList[Num])
-    return str(len(recordDict[str(sessionID)].wrongNumber))
+    return "間違った問題:" + str(tmpWrongList) + ",次の問題リスト:" + str(recordDict[str(sessionID)].problemNumberList)
     #return "<script> location.href='/' </script>"
 
 if __name__ == '__main__':
