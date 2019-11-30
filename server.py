@@ -652,9 +652,12 @@ def onlyMistakes():
     global recordDict
     sessionID = request.cookies.get(Session.sessionID,None)
     mistakeProb = ""
+    tmpList = recordDict[str(sessionID)].problemNumberList.copy()
     for Num in recordDict[str(sessionID)].wrongNumber:
-        mistakeProb += problems[recordDict[str(sessionID)].problemNumberList[Num]]["問題"] + "<br>"
-    return mistakeProb
+        recordDict[str(sessionID)].problemNumberList = tmpList[Num]
+        mistakeProb += problems[tmpList[Num]]["問題"] + "<br>"
+    recordDict[sessionID] = RecordData()
+    return "<script> location.href='/' </script>"
 
 if __name__ == '__main__':
    args = sys.argv
