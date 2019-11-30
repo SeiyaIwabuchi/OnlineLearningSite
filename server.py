@@ -652,7 +652,7 @@ def onlyMistakes():
    sessionID = request.cookies.get(Session.sessionID,None)
    mistakeProb = ""
    for Num in recordDict[str(sessionID)].wrongNumber:
-       mistakeProb += problems["問題"] + "<br>"
+       mistakeProb += problems[Num]["問題"] + "<br>"
    return mistakeProb
 
 if __name__ == '__main__':
