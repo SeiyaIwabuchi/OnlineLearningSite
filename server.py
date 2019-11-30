@@ -44,7 +44,7 @@ class LoginDataSet():
 
 #成績データ
 class RecordData():
-   def __init__(self):
+   def __init__(self,shuffle=True):
       self.totalAnswers = 0
       self.correctAnswers = 0
       self.wrongAnswers = 0
@@ -54,7 +54,8 @@ class RecordData():
       self.remoteIP = ""
       self.answers = []
       self.problemNumberList = [] #出題する問題の並びを制御する
-      self.shuffle()
+      if shuffle:
+        self.shuffle()
       self.cookieCreateTime = datetime.datetime.now()
    def getStatistics(self):
       data = [
@@ -656,7 +657,7 @@ def onlyMistakes():
     for Num in recordDict[str(sessionID)].wrongNumber:
         recordDict[str(sessionID)].problemNumberList = tmpList[Num]
         mistakeProb += problems[tmpList[Num]]["問題"] + "<br>"
-    recordDict[sessionID] = RecordData()
+    recordDict[sessionID] = RecordData(shuffle=False)
     return "<script> location.href='/' </script>"
 
 if __name__ == '__main__':
