@@ -292,29 +292,31 @@ def index():
 def receiveAnswer():
    radioRes = []
    sessionID = request.cookies.get(Session.sessionID,None)
-   probNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
    oldProbNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
 
    for i in range(4):
       radioRes.append(request.json['radio%d'%(i+1)])
 
    recordDict[sessionID].answers.append(raidoRes2Number(radioRes))
-   RorW = judgment(probNum,recordDict[sessionID].answers[len(recordDict[sessionID].answers)-1])
+   RorW = judgment(oldProbNum,recordDict[sessionID].answers[len(recordDict[sessionID].answers)-1])
    recordDict[sessionID].totalAnswers += 1
    probNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
    recordDict[sessionID].lastAccessTime = datetime.datetime.today()
    if RorW:
       recordDict[sessionID].correctAnswers += 1
-      recordDict[sessionID].correctNumber.append(recordDict[str(sessionID)].totalAnswers-1)
+      recordDict[sessionID].correctNumber.append(oldProbNum)
    else:
       recordDict[sessionID].wrongAnswers += 1
-      recordDict[sessionID].wrongNumber.append(recordDict[str(sessionID)].totalAnswers-1)
+      recordDict[sessionID].wrongNumber.append(oldProbNum)
 
    return_data = {
       "RorW":RorW,
       "correct":problems[oldProbNum]["選択肢" + problems[oldProbNum]["正答"]],
       "comment":problems[oldProbNum]["解説"] if problems[oldProbNum]["解説"] != "" else "特になし"
       }
+   
+   selectedNumber = recordDict[sessionID].answers[len(recordDict[sessionID].answers)-1]
+   print(f"sessionID:{sessionID},problemNumber:{oldProbNum},selected:{selectedNumber}")
    return jsonify(ResultSet=json.dumps(return_data))
 
 #次の問題をクリックされた時のメソッド
