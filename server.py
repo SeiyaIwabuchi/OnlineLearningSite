@@ -303,7 +303,6 @@ def receiveAnswer():
    recordDict[sessionID].answers.append(raidoRes2Number(radioRes))
    RorW = judgment(probNum,recordDict[sessionID].answers[len(recordDict[sessionID].answers)-1])
    recordDict[sessionID].totalAnswers += 1
-   probNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
    recordDict[sessionID].lastAccessTime = datetime.datetime.today()
    if RorW:
       recordDict[sessionID].correctAnswers += 1
