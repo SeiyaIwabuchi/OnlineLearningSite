@@ -649,11 +649,12 @@ def reverse_lookup(ip):
 
 @app.route(URL_onlyMistakes)
 def onlyMistakes():
-   sessionID = request.cookies.get(Session.sessionID,None)
-   mistakeProb = ""
-   for Num in recordDict[str(sessionID)].wrongNumber:
-       mistakeProb += problems[Num]["問題"] + "<br>"
-   return mistakeProb
+    global recordDict
+    sessionID = request.cookies.get(Session.sessionID,None)
+    mistakeProb = ""
+    for Num in recordDict[str(sessionID)].wrongNumber:
+        mistakeProb += problems[recordDict[str(sessionID)].problemNumberList[Num]]["問題"] + "<br>"
+    return mistakeProb
 
 if __name__ == '__main__':
    args = sys.argv
