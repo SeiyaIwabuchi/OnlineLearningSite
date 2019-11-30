@@ -653,7 +653,8 @@ def onlyMistakes():
     recordDict[str(sessionID)] = RecordData(shuffle=False)
     for Num in recordDict[str(sessionID)].wrongNumber:
         recordDict[str(sessionID)].problemNumberList.append(tmpList[Num])
-    return "<script> location.href='/' </script>"
+    return len(recordDict[str(sessionID)].wrongNumber)
+    #return "<script> location.href='/' </script>"
 
 if __name__ == '__main__':
    args = sys.argv
