@@ -625,10 +625,6 @@ def deleteRecord():
 @app.route("/test")
 def testFunc():
    sessionID = request.cookies.get(Session.sessionID,None)
-   recordDict[str(sessionID)].normalSequence()
-   print(recordDict[sessionID].problemNumberList)
-   recordDict[sessionID].shuffle()
-   print(recordDict[sessionID].problemNumberList)
    return  str(recordDict[str(sessionID)].problemNumberList)
 
 @app.route(URL_updateCookie)
