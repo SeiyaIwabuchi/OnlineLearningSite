@@ -625,11 +625,11 @@ def deleteRecord():
 @app.route("/test")
 def testFunc():
    sessionID = request.cookies.get(Session.sessionID,None)
-   recordDict[sessionID].normalSequence()
+   recordDict[str(sessionID)].normalSequence()
    print(recordDict[sessionID].problemNumberList)
    recordDict[sessionID].shuffle()
    print(recordDict[sessionID].problemNumberList)
-   return "レスポンス"
+   return  str(recordDict[str(sessionID)].problemNumberList)
 
 @app.route(URL_updateCookie)
 def updateCookie():
@@ -657,7 +657,6 @@ def onlyMistakes():
     recordDict[str(sessionID)] = RecordData(shuffle=False)
     for Num in recordDict[str(sessionID)].wrongNumber:
         recordDict[str(sessionID)].problemNumberList.append(tmpList[Num])
-        mistakeProb += problems[tmpList[Num]]["問題"] + "<br>"
     return "<script> location.href='/' </script>"
 
 if __name__ == '__main__':
