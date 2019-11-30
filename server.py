@@ -588,7 +588,7 @@ def main(subject,portNo):
    except FileNotFoundError:
       pass
    try:
-      app.run(threaded = True,debug=False,host="0.0.0.0", port=portNo)
+      app.run(threaded = True,debug=True,host="0.0.0.0", port=portNo)
    except KeyboardInterrupt:
       print("サーバー終了中",file=sys.stderr)
       #ここに終了処理
