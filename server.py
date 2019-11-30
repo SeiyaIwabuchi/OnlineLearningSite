@@ -127,6 +127,7 @@ URL_mainMenu = URL_root + "mainmenu"
 URL_deleteRecord = URL_root + "deleteRecord"
 URL_updateCookie = URL_root + "updateCookie"
 URL_problemJsonDownload = URL_root + "problemJsonDownload"
+URL_onlyMistakes = URL_root + "onlyMistakes"
 
 #HTML Source path
 htmlSourcePath = "./index.html"
@@ -645,6 +646,14 @@ def reverse_lookup(ip):
 		return socket.gethostbyaddr(str(ip))[0]
 	except:
 		return False
+
+@app.route(URL_onlyMistakes)
+def onlyMistakes():
+   sessionID = request.cookies.get(Session.sessionID,None)
+   mistakeProb = ""
+   for Num in recordDict[str(sessionID)].wrongNumber:
+       mistakeProb += problems["問題"] + "<br>"
+   return mistakeProb
 
 if __name__ == '__main__':
    args = sys.argv
