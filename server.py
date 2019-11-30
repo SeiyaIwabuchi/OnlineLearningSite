@@ -587,6 +587,8 @@ def main(subject,portNo):
          serialNumber = pickle.load(rd)
    except FileNotFoundError:
       pass
+   except EOFError:
+      pass
    try:
       app.run(threaded = True,debug=True,host="0.0.0.0", port=portNo)
    except KeyboardInterrupt:
