@@ -11,6 +11,21 @@
     <link rel="shortcut icon" href="../static/images/favicon.ico">
   </head>
   <body>
+    <header>
+      <div id="nav-drawer">
+          <input id="nav-input" type="checkbox" class="nav-unshown">
+          <label id="nav-open" for="nav-input"><span></span></label>
+          <label class="nav-unshown" id="nav-close" for="nav-input"></label>
+          <div id="nav-content">
+            <h5>メニュー</h5>
+            <input type="button" class="btn btn-secondary" onclick="location.href='/deleteRecord'" value="最初から始める">
+          	<input type="button" class="btn btn-secondary" onclick="location.href='/ProblemList.html'" value="問題一覧を見る">
+          	<button id="getMyResult" class="btn btn-secondary">途中結果を見る</button>
+          	<input type="button" class="btn btn-secondary" onclick="location.href='http://{dom}/mainmenu'" value="教科一覧">
+          </div>
+          <p>↑こんなところにハンバーガーが！！</p>
+      </div>
+    </header>
     <div id="wrapper">
       <div id="header">
 	      <img src="../static/images/オンライン学習ヘッダ.jpg">
@@ -36,9 +51,9 @@
 	    <input type="text" id="notetext"  class="form-control"/>
             <div id="menu">
               <button id="ansButton" class="btn btn-secondary">回答する</button>
-	      <div class="spinner-border" role="status" id="loadingGif">
-	        <span class="sr-only" id="loadingGif">Loading...</span>
-	      </div>
+      	      <div class="spinner-border" role="status" id="loadingGif">
+      	         <span class="sr-only" id="loadingGif">Loading...</span>
+	             </div>
               <h4 id="RorW">{RorW}</h3>
               <h4 id="Correct">{correct}</h3>
               <h3 id="解説">解説</h3>
@@ -46,24 +61,23 @@
               <button id="next" class="btn btn-secondary">次の問題</button>
               <br>
               <br>
-	      <div id="sideBySide">
+	            <div id="sideBySide">
               	<input type="button" class="btn btn-secondary" onclick="location.href='/deleteRecord'" value="最初から始める">
               	<input type="button" class="btn btn-secondary" onclick="location.href='/ProblemList.html'" value="問題一覧を見る">
               	<button id="getMyResult" class="btn btn-secondary">途中結果を見る</button>
-	    </div>
+	              <input type="button" class="btn btn-secondary" onclick="location.href='http://{dom}/mainmenu'" value="教科一覧">
+	            </div>
             </div>
             <br>
         </div>
       </div>
       <div id="footer">
+        <p>
+          問題の間違い等は問題を作った人に教えてあげてください。
+        </p>
         <h6 id="sessionID">{sessionID}</h6>
-        <h6>テスト環境で動作中</h6>
-        <h6>cookieを利用してセッション維持できるようにしたのでcookieを有効にしておいてください。
-          <br>ブラウザバックは使用しないでください。使ったときはリロードすると進捗が復元されます。
-          <br>進捗は教科ごとに最終アクセスから1時間保持されるようになっています。
-        </h6>
         <div id="menu">
-          <input type="button" class="btn btn-secondary" onclick="location.href='http://{dom}/mainmenu'" value="メニュー">
+          
         </div>
       </div>
     </div>

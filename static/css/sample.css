@@ -1,6 +1,7 @@
 * {
 	margin: 0;
 	padding: 0; /* 全てのプロパティの余白とパディングをリセットしています。*/
+	font-family: Yu Gothic;
   }
   #center{
 	text-align: center;
@@ -56,7 +57,8 @@
 	margin-top: 4%;
     }
 
-  @media screen and (min-width: 767px) { /*ウィンドウ幅が767px以上の場合に適用*/
+  @media screen and (min-width: 730px) { /*ウィンドウ幅が767px以上の場合に適用*/
+  /*PC用*/
 	#wrapper {
 	  width: 700px;
 	  margin: auto;/* 幅固定（700px）でセンタリングします。*/
@@ -93,8 +95,12 @@
 	    justify-content:space-around;
 	    flex-wrap: nowrap;
 	}
+	#nav-drawer {
+    display: none;
   }
-  @media screen and (max-width: 479px) { /*ウィンドウ幅が767px以上の場合に適用*/
+}
+  @media screen and (max-width: 730px) { /*ウィンドウ幅が767px以上の場合に適用*/
+  /*スマホ用*/
 	#wrapper {
 	  width: auto;
 	  margin: 4%;/* 幅固定（700px）でセンタリングします。*/
@@ -126,13 +132,114 @@
 	  list-style: none;
 	}
 	#sideBySide {
-	    display: flex;
-	    justify-content:space-around;
-	    flex-wrap: nowrap;
+	    display: none;
 	}
 	img{
 	  width:100%;
 	  max-width:100%;
 	  height:auto;
 	}
+	/*ハンバーガー*/
+	header {
+    padding: 8px;
+    background: #708090;
   }
+  #nav-drawer {
+    position: relative;
+    
+  }
+  
+  /*チェックボックス等は非表示に*/
+  .nav-unshown {
+    display:none;
+  }
+  
+  /*アイコンのスペース*/
+  #nav-open {
+    display: inline-block;
+    width: 30px;
+    height: 16px;
+    vertical-align: middle;
+  }
+  
+  /*ハンバーガーアイコンをCSSだけで表現*/
+  #nav-open span, #nav-open span:before, #nav-open span:after {
+    position: absolute;
+    height: 3px;/*線の太さ*/
+    width: 25px;/*長さ*/
+    border-radius: 3px;
+    background: #555;
+    display: block;
+    content: '';
+    cursor: pointer;
+  }
+  #nav-open span:before {
+    bottom: -8px;
+  }
+  #nav-open span:after {
+    bottom: -16px;
+  }
+  
+  /*閉じる用の薄黒カバー*/
+  #nav-close {
+    display: none;/*はじめは隠しておく*/
+    position: fixed;
+    z-index: 99;
+    top: 0;/*全体に広がるように*/
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    opacity: 0;
+    transition: .3s ease-in-out;
+  }
+  
+  /*中身*/
+  #nav-content {
+    overflow: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;/*最前面に*/
+    width: 80%;/*右側に隙間を作る（閉じるカバーを表示）*/
+    max-width: 330px;/*最大幅（調整してください）*/
+    height: 100%;
+    background: #fff;/*背景色*/
+    transition: .3s ease-in-out;/*滑らかに表示*/
+    -webkit-transform: translateX(-105%);
+    transform: translateX(-105%);/*左に隠しておく*/
+    text-align: center;
+  }
+  #nav-content h5{
+  	background-color: #708090;
+  	padding:1%;
+  	color: white;
+  	text-align: center;
+  	margin-bottom: 30px;
+  }
+  #nav-content input, #nav-content button{
+  	width: 90%;
+  	margin: 3px;
+  }
+  /*チェックが入ったらもろもろ表示*/
+  #nav-input:checked ~ #nav-close {
+    display: block;/*カバーを表示*/
+    opacity: .5;
+  }
+  
+  #nav-input:checked ~ #nav-content {
+    -webkit-transform: translateX(0%);
+    transform: translateX(0%);/*中身を表示（右へスライド）*/
+    box-shadow: 6px 0 25px rgba(0,0,0,.15);
+  }
+  
+  #nav-drawer p{
+  	margin-bottom: 0px;
+  	color: white;
+  }
+}
+@media screen and (max-width: 300px){
+	*{
+		display:none;
+	}
+}

@@ -665,4 +665,7 @@ if __name__ == '__main__':
       print("コマンドライン引数が不足しています。第1引数に教科名,第2引数にポートを指定してください。",file=sys.stderr)
    elif len(args) > 4:
       print("コマンドライン引数が多すぎます。",file=sys.stderr)
-   main(args[1],int(args[2]))
+   try:
+      main(args[1],int(args[2]))
+   except IndexError:
+      main("test",8080)
