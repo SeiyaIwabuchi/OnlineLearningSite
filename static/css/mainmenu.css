@@ -11,7 +11,7 @@
 	background-color: bisque;
 	padding:1%;
   }
-  @media screen and (min-width: 767px) { /*ウィンドウ幅が767px以上の場合に適用*/
+  @media screen and (min-width: 730px) { /*ウィンドウ幅が767px以上の場合に適用*/
 	#wrapper {
 	  width: 700px;
 	  margin: auto;/* 幅固定（700px）でセンタリングします。*/
@@ -48,8 +48,11 @@
 	    justify-content:space-around;
 	    flex-wrap: nowrap;
 	}
+	#nav-drawer {
+    display: none;
   }
-  @media screen and (max-width: 479px) { /*ウィンドウ幅が767px以上の場合に適用*/
+  }
+  @media screen and (max-width: 730px) { /*ウィンドウ幅が767px以上の場合に適用*/
 	#wrapper {
 	  width: auto;
 	  margin: 4%;/* 幅固定（700px）でセンタリングします。*/
@@ -81,13 +84,178 @@
 	  list-style: none;
 	}
 	 #sideBySide {
-	     display: flex;
-	     justify-content:space-around;
-	     flex-wrap: nowrap;
+	     display: none;
 	}
 	img{
 	  width:100%;
 	  max-width:100%;
 	  height:auto;
 	}
+	/*ハンバーガー*/
+	header {
+    padding: 8px;
+    background: #708090;
   }
+  #nav-drawer {
+    position: relative;
+    
+  }
+  
+  /*チェックボックス等は非表示に*/
+  .nav-unshown {
+    display:none;
+  }
+  
+  /*アイコンのスペース*/
+  #nav-open {
+    display: inline-block;
+    width: 30px;
+    height: 16px;
+    vertical-align: middle;
+  }
+  
+  /*ハンバーガーアイコンをCSSだけで表現*/
+  #nav-open span, #nav-open span:before, #nav-open span:after {
+    position: absolute;
+    height: 3px;/*線の太さ*/
+    width: 25px;/*長さ*/
+    border-radius: 3px;
+    background: #555;
+    display: block;
+    content: '';
+    cursor: pointer;
+  }
+  #nav-open span:before {
+    bottom: -8px;
+  }
+  #nav-open span:after {
+    bottom: -16px;
+  }
+  
+  /*閉じる用の薄黒カバー*/
+  #nav-close {
+    display: none;/*はじめは隠しておく*/
+    position: fixed;
+    z-index: 99;
+    top: 0;/*全体に広がるように*/
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    opacity: 0;
+    transition: .3s ease-in-out;
+  }
+  
+  /*中身*/
+  #nav-content {
+    overflow: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;/*最前面に*/
+    width: 80%;/*右側に隙間を作る（閉じるカバーを表示）*/
+    max-width: 330px;/*最大幅（調整してください）*/
+    height: 100%;
+    background: #fff;/*背景色*/
+    transition: .3s ease-in-out;/*滑らかに表示*/
+    -webkit-transform: translateX(-105%);
+    transform: translateX(-105%);/*左に隠しておく*/
+    text-align: center;
+  }
+  #nav-content h5{
+  	background-color: #708090;
+  	padding:1%;
+  	color: white;
+  	text-align: center;
+  	margin-bottom: 30px;
+  }
+  #nav-content input, #nav-content button{
+  	width: 90%;
+  	margin: 3px;
+  }
+  /*チェックが入ったらもろもろ表示*/
+  #nav-input:checked ~ #nav-close {
+    display: block;/*カバーを表示*/
+    opacity: .5;
+  }
+  
+  #nav-input:checked ~ #nav-content {
+    -webkit-transform: translateX(0%);
+    transform: translateX(0%);/*中身を表示（右へスライド）*/
+    box-shadow: 6px 0 25px rgba(0,0,0,.15);
+  }
+  
+  #nav-drawer p{
+  	margin-bottom: 0px;
+  	color: white;
+  }
+  #nav-drawer #message{
+  	margin-bottom: 0px;
+  	color: black;
+  }
+  #menu {
+	  text-align:center;
+  	display: flex;
+  	flex-direction: column;
+	  width: auto;     /* floatの width 指定は必須です。*/
+	}
+	#menu ul {
+	  list-style: none;
+	}
+	#footer-menu{
+	  display: none;
+	}
+  }
+@media screen and (max-width: 300px){
+	*{
+		display:none;
+		content: "小さすぎます";
+	}
+}
+ /* === ボタンを表示するエリア ============================== */
+.switchArea {
+  position       : relative;            /* 親要素が基点       */
+  margin         : auto;                /* 中央寄せ           */
+  width          : 62px;               /* ボタンの横幅       */
+  background     : #fff;                /* デフォルト背景色   */
+}
+
+ /* === チェックボックス ==================================== */
+.switchArea input[type="checkbox"] {
+  display        : none;            /* チェックボックス非表示 */
+}
+
+ /* === チェックボックスのラベル（標準） ==================== */
+.switchArea label {
+  display        : block;               /* ボックス要素に変更 */
+  box-sizing     : border-box;          /* 枠線を含んだサイズ */
+  height         : 32px;                /* ボタンの高さ       */
+  border         : 2px solid #999999;   /* 未選択タブのの枠線 */
+  border-radius  : 16px;                /* 角丸               */
+}
+
+ /* === チェックボックスのラベル（ONのとき） ================ */
+.switchArea input[type="checkbox"]:checked +label {
+  border-color   : #000000;             /* 選択タブの枠線     */
+}
+
+ /* === 丸部分のSTYLE（標準） =============================== */
+.switchArea #swImg {
+  position       : absolute;            /* 親要素からの相対位置*/
+  width          : 24px;                /* 丸の横幅           */
+  height         : 24px;                /* 丸の高さ           */
+  background     : #999999;             /* カーソルタブの背景 */
+  top            : 4px;                 /* 親要素からの位置   */
+  left           : 4px;                 /* 親要素からの位置   */
+  border-radius  : 12px;                /* 角丸               */
+  transition     : .2s;                 /* 滑らか変化         */
+}
+
+ /* === 丸部分のSTYLE（ONのとき） =========================== */
+.switchArea input[type="checkbox"]:checked ~ #swImg {
+  transform      : translateX(30px);    /* 丸も右へ移動       */
+  background     : #ffffff;             /* カーソルタブの背景 */
+}
+.switchArea input[type="checkbox"]:checked ~ label {
+  border         : 2px solid #ffffff;   /* 未選択タブのの枠線 */
+}

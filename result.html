@@ -12,9 +12,31 @@
     <link rel="shortcut icon" href="../static/images/favicon.ico">
   </head>
   <body>
+    <header>
+      <div id="nav-drawer">
+          <input id="nav-input" type="checkbox" class="nav-unshown">
+          <label id="nav-open" for="nav-input"><span></span></label>
+          <label class="nav-unshown" id="nav-close" for="nav-input"></label>
+          <div id="nav-content">
+            <h5>メニュー</h5>
+            <input type="button" class="btn btn-secondary" onclick="location.href='http://{dom}/mainmenu'" value="教科一覧">
+            <input type="button" class="btn btn-secondary" onclick="location.href='/ProblemList.html'" value="問題一覧">
+          	<input type="button" class="btn btn-secondary" onclick="location.href='/'" value="問題に戻る">
+            <input type="button" class="btn btn-secondary" onclick="location.href='/deleteRecord'" value="もう一度解く">
+            <input type="button" class="btn btn-secondary" onclick="location.href='/onlyMistakes'" value="間違った問題だけ">
+          	<div class="switchArea">
+              <input type="checkbox" id="switch1">
+              <label for="switch1"><span></span></label>
+              <div id="swImg"></div>
+            </div>
+            <p id="message">ダークテーマ用（未実装)</p>
+          </div>
+          <p>↑こんなところにハンバーガーが！！</p>
+      </div>
+    </header>
     <div id="wrapper">
       <div id="header">
-          <img src="../static/images/オンライン学習ヘッダ.jpg"
+          <img src="../static/images/オンライン学習ヘッダ.jpg"/>
       </div>
       <div id="main">
         <div id="container-fluid">
@@ -34,13 +56,13 @@
           </table>
           <div id="menu">
 	    <div id="sideBySide">
-            	<input type="button" class="btn btn-secondary" onclick="location.href='/ProblemList.html'" value="問題一覧を見る">
-            	<input type="button" class="btn btn-secondary" onclick="location.href='/'" value="問題に戻る">
-              <input type="button" class="btn btn-secondary" onclick="location.href='/deleteRecord'" value="もう一度解く">
-              <input type="button" class="btn btn-secondary" onclick="location.href='/onlyMistakes'" value="間違った問題だけ">
+      	<input type="button" class="btn btn-secondary" onclick="location.href='/ProblemList.html'" value="問題一覧">
+      	<input type="button" class="btn btn-secondary" onclick="location.href='/'" value="問題に戻る">
+        <input type="button" class="btn btn-secondary" onclick="location.href='/deleteRecord'" value="もう一度解く">
+        <input type="button" class="btn btn-secondary" onclick="location.href='/onlyMistakes'" value="間違った問題だけ">
+        <input type="button" class="btn btn-secondary" onclick="location.href='http://{dom}/mainmenu'" value="教科一覧">
 	    </div>
 	    <br>
-	    <input type="button" class="btn btn-secondary" onclick="location.href='http://{dom}/mainmenu'" value="メニューに戻る">
           </div>
         </div>
       </div>
