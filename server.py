@@ -14,6 +14,13 @@ import math
 import pickle
 import socket
 
+#教科管理用
+startedServers = []
+
+#教科一覧のテンプレート
+subjectListTemp = """\t<tr>\n\t<td>{subName}</td>\n\t<td align="right"><button onclick="location.href='{URL}'" class="btn btn-secondary" id="{subName2}">開始</button></td>\n</tr>"""
+
+
 #serverDmain
 serverAddress = "iwabuchi.ddns.net"
 
@@ -44,7 +51,7 @@ class LoginDataSet():
 
 #成績データ
 class RecordData():
-   def __init__(self,shuffle=True):
+   def __init__(self,subName,shuffle=True):
       self.totalAnswers = 0
       self.correctAnswers = 0
       self.wrongAnswers = 0
@@ -54,6 +61,7 @@ class RecordData():
       self.remoteIP = ""
       self.answers = []
       self.problemNumberList = [] #出題する問題の並びを制御する
+      self.subName = subName
       if shuffle:
         self.shuffle()
       self.cookieCreateTime = datetime.datetime.now()
@@ -63,7 +71,7 @@ class RecordData():
          self.correctAnswers,
          self.wrongAnswers,
          self.correctAnswers / self.totalAnswers,
-         self.totalAnswers / len(problems)
+         self.totalAnswers / len(problems[self.subName])
          ]
       return data
    #引数に指定された問題番号の正誤を返す
@@ -100,18 +108,18 @@ class RecordData():
       #print(res)
       return res[probNum]
    def normalSequence(self):
-      for i in range(len(problems)):
+      for i in range(len(problems[self.subName])):
          self.problemNumberList.append(i)
    def shuffle(self):
       self.normalSequence()
-      i = len(problems) - 1
+      i = len(problems[self.subName]) - 1
       while (i > 0):
          j = math.floor(random.random() * (i + 1))
          swap = self.problemNumberList[i]
          self.problemNumberList[i] = self.problemNumberList[j]
          self.problemNumberList[j] = swap
          i = (i - 1)
-      self.problemNumberList.append(len(problems))
+      self.problemNumberList.append(len(problems[self.subName]))
 
 #URL
 URL_root = "/"
@@ -129,6 +137,7 @@ URL_deleteRecord = URL_root + "deleteRecord"
 URL_updateCookie = URL_root + "updateCookie"
 URL_problemJsonDownload = URL_root + "problemJsonDownload"
 URL_onlyMistakes = URL_root + "onlyMistakes"
+URL_addSubject = URL_root + "addsub"
 
 #HTML Source path
 htmlSourcePath = "./index.html"
@@ -150,13 +159,17 @@ liveLimit = 60 * 60  * 24 * 120 #秒指定
 app = Flask(__name__,template_folder="./")
 
 #教科名
-subjectName = "None"
+subjectNameList = []
 
 #問題jsonパス
-problemsFilePath = "./problems_{subjectName}.json"
+problemsFilePathTemp = "./problems_{subjectName}.json"
+problemsFilePathsDict = {}
+
+#教科リストファイルパス
+subjectNameListPath = "./subjectList.json"
 
 #問題データセット
-problems = object()
+problems = {}
 
 #成績辞書
 recordDict = {}
@@ -184,26 +197,26 @@ serialNumber = 0
 def loadproblemsFromJson():
    global problems
    global problemUpdateTime
-   try:
-      with open(problemsFilePath,"r",encoding="utf-8_sig") as prob:
-         problems = json.load(prob)
-      checkProblems()
-      print("問題に問題はありませんでした。")
-      problemUpdateTime = datetime.datetime.now()
-      print(problemUpdateTime)
-      return True,""
-   except ProblemError:
-      print("問題に問題がありました。",file=sys.stderr)
-      return False,"JSONデータに不備があります。"
-   except FileNotFoundError:
-      print("問題ファイル:{probName}がありませんでした。ファイルを作成します。".format(probName=problemsFilePath,file=sys.stderr))
-      with open(problemsFilePath,mode="w",encoding="utf-8_sig") as probJson:
-         probJson.write("""[{"番号":"1","問題":"問題ファイルを更新してください","選択肢1":"管理者に連絡する","選択肢2":"自分で更新する","選択肢3":"サーバーをぶっ壊す","選択肢4":"寝る","正答":"3","解説":"回答しても何も起きませんよ。"}]""")
-         return -1 #もう一度ロードするメッセージ
+   global startedServers
+   for subName in subjectNameList:
+      try:
+         with open(problemsFilePathsDict[subName],"r",encoding="utf-8_sig") as prob:
+            problems[subName] = json.load(prob)
+         checkProblems(subName)
+         print("{}:問題に問題はありませんでした。".format(subName))
+         problemUpdateTime = datetime.datetime.now()
+         print(problemUpdateTime)
+         startedServers.append(subName)
+      except ProblemError:
+         print("{}:問題に問題がありました。".format(subName),file=sys.stderr)
+      except FileNotFoundError:
+         print("{sn}:問題ファイル:{probName}がありませんでした。ファイルを作成します。".format(sn=subName,probName=problemsFilePathsDict[subName],file=sys.stderr))
+         with open(problemsFilePathsDict[subName],mode="w",encoding="utf-8_sig") as probJson:
+            probJson.write("""[{"番号":"1","問題":"問題ファイルを更新してください","選択肢1":"管理者に連絡する","選択肢2":"自分で更新する","選択肢3":"サーバーをぶっ壊す","選択肢4":"寝る","正答":"3","解説":"回答しても何も起きませんよ。"}]""")
 
 #jsonデータのチェック
-def checkProblems():
-   for p in problems:
+def checkProblems(subName):
+   for p in problems[subName]:
       if not p["正答"].isnumeric():
          raise ProblemError
 #上の独自例外
@@ -212,9 +225,9 @@ class ProblemError(Exception):
       print("JSONデータの正答欄に不備があります。正答欄には1~4の半角数字を入力できます。",file=sys.stderr)
 
 #htmlに問題データを乗せる(最初だけ)
-def problemWritingToHtml(problemNum,htmlSource,sessionID):
+def problemWritingToHtml(problemNum,htmlSource,sessionID,subName):
    try:
-      tmpDict = problems[problemNum]
+      tmpDict = problems[subName][problemNum]
       #print(tmpDict)
       htmlSource = htmlSource.format(
          problem = tmpDict["問題"],
@@ -226,7 +239,7 @@ def problemWritingToHtml(problemNum,htmlSource,sessionID):
          correct = "",
          sessionID = str(sessionID),
          comment = "",
-         subName=subjectName,
+         subName=subName,
          dom= "localhost" if isLocalhost else serverAddress
          )
       return htmlSource
@@ -246,20 +259,64 @@ def judgment(problemNum,choice):
    else:
       return False
 
-@app.route(URL_root)
-def index():
+#メインメニュー表示メソッド
+@app.route("/mainmenu")
+def getMainMenu():
+   #IPアドレスの関係
+   if not (request.remote_addr in dTi.keys()):
+      dTi[request.remote_addr] = reverse_lookup(request.remote_addr)
+   print("Access from : ",end="")
+   print(dTi[request.remote_addr] if dTi[request.remote_addr] != False else request.remote_addr)
+   #ログ
+   logList.append(request.remote_addr)
+   subjectListHtml = ""
+   for subName in subjectNameList:
+      subjectListHtml += subjectListTemp.format(URL="/" + subName,subName=subName,subName2=subName) + "\n"
+   subjectListHtml += subjectListTemp.format(URL=URL_addSubject,subName="教科更新",subName2=subName) + "\n"
+   with open(mainMenuHtmlPath,'r',encoding="utf-8_sig") as htso:
+      htmlSource = htso.read().format(buttons=subjectListHtml)
+   return htmlSource
+
+@app.route("/")
+def redirectToMainmenu():
+   return "<script> location.href='/mainmenu'</script>"
+
+#教科追加用メソッド
+@app.route(URL_addSubject)
+def addSubjectByWeb():
+   loadSubjects()
+   for subName in subjectNameList:
+      problemsFilePathsDict[subName] = problemsFilePathTemp.format(subjectName=subName)
+   if loadproblemsFromJson() == -1:
+      loadproblemsFromJson()
+   flg_update = False
+   for subName in subjectNameList:
+      if not subName in startedServers:
+         flg_update = True
+         startedServers.append(subName)
+   if flg_update:
+      print("<h1>教科を更新しました。{subName}を追加</h1>".format(subName=subName))
+      return "<h1>教科を更新しました。{subName}を追加</h1>".format(subName=subName) + """<input type="button" class="btn btn-default" onclick="location.href='/mainmenu'" value="メニューに戻る">"""
+   else:
+      return "<h1>教科の更新はありません。</h1>" + """<input type="button" class="btn btn-default" onclick="location.href='/mainmenu'" value="メニューに戻る">"""
+
+
+@app.route("/<subName>")
+def index(subName=None):
+   #IPアドレスの関係
    if not (request.remote_addr in dTi.keys()):
       dTi[request.remote_addr] = reverse_lookup(request.remote_addr)
    else:
       print("Access from : ",end="")
       print(dTi[request.remote_addr] if dTi[request.remote_addr] != False else request.remote_addr,end=" ,IP : ")
       print(request.remote_addr)
+   #セッション管理の関係
    sessionID = request.cookies.get(Session.sessionID,Session.NoSession)
    if sessionID == Session.NoSession or not (sessionID in recordDict.keys()):
       #新規ユーザーへの処理
       print("new user")
       sessionID = searchForFree(recordDict)
-      recordDict[str(sessionID)] = RecordData()
+      recordDict[str(sessionID)] = RecordData(subName)
    elif recordDict[sessionID].cookieCreateTime < problemUpdateTime: #念のために10秒進める。
       print("old user")
       sdkjs = """問題が更新されました。\\n新しい問題を回答しますか？\\n(新しい問題に切り替えると進捗がすべて消えます。\\n現在の回答終了後に「最初から始める」から更新後の問題を解くことができます。)""".encode("shift_jis").decode("shift_jis")
@@ -281,7 +338,7 @@ def index():
    #クライアントへの返答
    with open(htmlSourcePath,'r',encoding="utf-8_sig") as htso:
       htmlSource = htso.read()
-      htmlSource = problemWritingToHtml(probNum,htmlSource,sessionID)
+      htmlSource = problemWritingToHtml(probNum,htmlSource,sessionID,subName)
       response = make_response(htmlSource)
       # Cookieの設定を行う
       max_age = liveLimit
@@ -558,23 +615,31 @@ def searchForFree(dic):
       genKey += 1
    return genKey
 
-#メインメニュー表示メソッド
-@app.route(URL_mainMenu)
-def getMainMenu():
-   with open(mainMenuHtmlPath,'r',encoding="utf-8_sig") as htso:
-      htmlSource = htso.read()
-   return htmlSource
 
-def main(subject,portNo):
-   global problemsFilePath
-   global subjectName
+#教科一覧を読み込む
+def loadSubjects():
+   global subjectNameList
+   try:
+      with open(subjectNameListPath,"r",encoding="utf-8") as snlp:
+         subjectNameList = json.load(snlp)
+   except FileNotFoundError:
+      print("subjectList.jsonが見つかりません。作成します。")
+      with open(subjectNameListPath,"w",encoding="utf-8") as snlp:
+         snlp.write("[]")
+      with open(subjectNameListPath,"r",encoding="utf-8") as snlp:
+         subjectNameList = json.load(snlp)
+
+def main():
+   global problemsFilePathsDict
+   global subjectNameList
    global recordDict
    global serialNumber
    global portNum
-   portNum = portNo
-   print("{subName}:サーバー起動".format(subName=subject))
-   subjectName=subject
-   problemsFilePath = problemsFilePath.format(subjectName=subjectName)
+   global subjectNameList
+   print("サーバー起動")
+   loadSubjects()
+   for subName in subjectNameList:
+      problemsFilePathsDict[subName] = problemsFilePathTemp.format(subjectName=subName)
    if loadproblemsFromJson() == -1:
       loadproblemsFromJson()
    thread = threading.Thread(target=organize)
@@ -582,23 +647,23 @@ def main(subject,portNo):
    thread.start()
    print("定期処理スタート")
    try:
-      with open("./recordDic_{subName}.bin".format(subName=subjectName),"rb") as rd:
+      with open("./recordDic.bin","rb") as rd:
          recordDict = pickle.load(rd)
-      with open("./serialNumber_{subName}.bin".format(subName=subjectName),"rb") as rd:
+      with open("./serialNumber.bin","rb") as rd:
          serialNumber = pickle.load(rd)
    except FileNotFoundError:
       pass
    except EOFError:
       pass
    try:
-      app.run(threaded = True,debug=True,host="0.0.0.0", port=portNo)
+      app.run(threaded = True,debug=True,host="0.0.0.0", port=80)
    except KeyboardInterrupt:
       print("サーバー終了中",file=sys.stderr)
       #ここに終了処理
    finally:
-      with open("./recordDic_{subName}.bin".format(subName=subjectName),"wb") as rd:
+      with open("./recordDic.bin","wb") as rd:
          pickle.dump(recordDict,rd)
-      with open("./serialNumber_{subName}.bin".format(subName=subjectName),"wb") as rd:
+      with open("./serialNumbersu.bin","wb") as rd:
          pickle.dump(serialNumber,rd)
       print("サーバ終了",file=sys.stderr)
 
@@ -618,7 +683,7 @@ def add_header(r):
 def deleteRecord():
    global recordDict
    sessionID = request.cookies.get(Session.sessionID,None)
-   recordDict[sessionID] = RecordData()
+   recordDict[sessionID] = RecordData(recordDict[sessionID].subName)
    return "<script> location.href='/' </script>"
 
 @app.route("/test")
@@ -660,12 +725,4 @@ def onlyMistakes():
         return "<script> alert('間違った問題はありません。'); window.location.href='/deleteRecord'; </script>";
 
 if __name__ == '__main__':
-   args = sys.argv
-   if len(args) < 3:
-      print("コマンドライン引数が不足しています。第1引数に教科名,第2引数にポートを指定してください。",file=sys.stderr)
-   elif len(args) > 4:
-      print("コマンドライン引数が多すぎます。",file=sys.stderr)
-   try:
-      main(args[1],int(args[2]))
-   except IndexError:
-      main("test",8080)
+   main()
