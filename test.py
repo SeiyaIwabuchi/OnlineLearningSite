@@ -46,4 +46,9 @@ def foo():
         retStr = "<h1>{uid}様ですね。</h1>".format(uid=uid)
     return retStr
 
+@app.route('/<name>/foo')
+def vaa(name=None):
+    if name != None:
+        return "<h1>{}</h1>".format(name)
+
 app.run(threaded = True,debug=False,host="0.0.0.0", port=80)

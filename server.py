@@ -133,8 +133,8 @@ URL_login = URL_root + "login"
 URL_auth = URL_root + "auth"
 URL_deleteAdminURL = URL_root + "deleteAdminURL/<palmt>"
 URL_mainMenu = URL_root + "mainmenu"
-URL_deleteRecord = URL_root + "deleteRecord"
-URL_updateCookie = URL_root + "updateCookie"
+URL_deleteRecord = URL_root + "<subName>/deleteRecord"
+URL_updateCookie = URL_root + "<subName>/updateCookie"
 URL_problemJsonDownload = URL_root + "problemJsonDownload"
 URL_onlyMistakes = URL_root + "onlyMistakes"
 URL_addSubject = URL_root + "addsub"
@@ -323,9 +323,9 @@ def index(subName=None):
       return "\
          <script>\
             if(window.confirm(\""+sdkjs+"\")){\
-               location.href = '/deleteRecord'\
+               location.href = '/" + subName + "/deleteRecord'\
             }else{\
-               location.href = '/updateCookie'\
+               location.href = '/" + subName + "/updateCookie'\
             }\
          </script>\
       "
@@ -680,11 +680,11 @@ def add_header(r):
    return r
 
 @app.route(URL_deleteRecord)
-def deleteRecord():
+def deleteRecord(subName=None):
    global recordDict
    sessionID = request.cookies.get(Session.sessionID,None)
    recordDict[sessionID] = RecordData(recordDict[sessionID].subName)
-   return "<script> location.href='/' </script>"
+   return "<script> location.href='/" + subName + "' </script>"
 
 @app.route("/test")
 def testFunc():
@@ -692,11 +692,11 @@ def testFunc():
    return  str(recordDict[str(sessionID)].problemNumberList)
 
 @app.route(URL_updateCookie)
-def updateCookie():
+def updateCookie(subName=None):
    global recordDict
    sessionID = request.cookies.get(Session.sessionID,None)
    recordDict[sessionID].cookieCreateTime = datetime.datetime.now()
-   return "<script> location.href='/' </script>"
+   return "<script> location.href='/" + subName + "' </script>"
 
 @app.route(URL_problemJsonDownload)
 def problemJsonDownload():
