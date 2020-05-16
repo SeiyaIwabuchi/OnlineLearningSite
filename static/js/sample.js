@@ -29,7 +29,7 @@ function init() {
       $("#ansButton").hide();
       $.ajax({
         type:'POST',
-        url:'/postText',
+        url:location.href.split("/")[location.href.split("/").length-1] + '/postText',
         data:textData,
         contentType:'application/json',
         success:function(data) {
@@ -66,7 +66,7 @@ function init() {
     $("#notetext").val("");
     $.ajax({
       type:'POST',
-      url:'/nextPoroblem',
+      url:location.href.split("/")[location.href.split("/").length-1] + '/nextPoroblem',
       data:textData,
       contentType:'application/json',
       success:function(data) {
@@ -93,12 +93,12 @@ function init() {
           $("#radio4").prop('checked', false);
           $("input:[name=rad]").attr("checked",false);
         }else{
-          window.location.href = "/result";
+          window.location.href = location.href.split("/")[location.href.split("/").length-1] + "/result";
         }
       }
     });
   });
-  $("#getMyResult").click(function(){
-    window.location.href = "/result";
+  $(".getMyResult").click(function() {
+    window.location.href = location.href.split("/")[location.href.split("/").length-1] + "/result";
   });
 }

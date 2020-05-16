@@ -123,10 +123,10 @@ class RecordData():
 
 #URL
 URL_root = "/"
-URL_answerRequest = URL_root + "postText"
-URL_nextProblem = URL_root + "nextPoroblem"
-URL_result = URL_root + "result"
-URL_ProblemList = URL_root + "ProblemList.html"
+URL_answerRequest = URL_root + "<subName>/postText"
+URL_nextProblem = URL_root + "<subName>/nextPoroblem"
+URL_result = URL_root + "<subName>/result"
+URL_ProblemList = URL_root + "<subName>/ProblemList.html"
 URL_admin = URL_root + "admin.html/<hashedValue>"
 URL_upProblem = URL_root + "upProblem"
 URL_login = URL_root + "login"
@@ -253,8 +253,8 @@ def raidoRes2Number(radioRes):
          return index
 
 #回答時に呼び出される。正誤を返す。
-def judgment(problemNum,choice):
-   if(int(problems[problemNum]["正答"]) == choice+1):
+def judgment(problemNum,choice,subName):
+   if(int(problems[subName][problemNum]["正答"]) == choice+1):
       return True
    else:
       return False
@@ -348,7 +348,7 @@ def index(subName=None):
 
 #回答するを押したときの動作
 @app.route(URL_answerRequest, methods=['POST'])
-def receiveAnswer():
+def receiveAnswer(subName=None):
    radioRes = []
    sessionID = request.cookies.get(Session.sessionID,None)
    probNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
@@ -358,7 +358,7 @@ def receiveAnswer():
       radioRes.append(request.json['radio%d'%(i+1)])
 
    recordDict[sessionID].answers.append(raidoRes2Number(radioRes))
-   RorW = judgment(probNum,recordDict[sessionID].answers[len(recordDict[sessionID].answers)-1])
+   RorW = judgment(probNum,recordDict[sessionID].answers[len(recordDict[sessionID].answers)-1],subName)
    recordDict[sessionID].totalAnswers += 1
    recordDict[sessionID].lastAccessTime = datetime.datetime.today()
    if RorW:
@@ -370,24 +370,24 @@ def receiveAnswer():
 
    return_data = {
       "RorW":RorW,
-      "correct":problems[oldProbNum]["選択肢" + problems[oldProbNum]["正答"]],
-      "comment":problems[oldProbNum]["解説"] if problems[oldProbNum]["解説"] != "" else "特になし"
+      "correct":problems[subName][oldProbNum]["選択肢" + problems[subName][oldProbNum]["正答"]],
+      "comment":problems[subName][oldProbNum]["解説"] if problems[subName][oldProbNum]["解説"] != "" else "特になし"
       }
    return jsonify(ResultSet=json.dumps(return_data))
 
 #次の問題をクリックされた時のメソッド
 @app.route(URL_nextProblem, methods=['POST'])
-def nextPoroblem():
+def nextPoroblem(subName=None):
    #サーバー側では問題jsonの組み立てを行う
    sessionID = request.cookies.get(Session.sessionID,None)
    try:
       probNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
       problemJson = {
-         "problem":problems[probNum]["問題"],
-         "choice1":problems[probNum]["選択肢1"],
-         "choice2":problems[probNum]["選択肢2"],
-         "choice3":problems[probNum]["選択肢3"],
-         "choice4":problems[probNum]["選択肢4"],
+         "problem":problems[subName][probNum]["問題"],
+         "choice1":problems[subName][probNum]["選択肢1"],
+         "choice2":problems[subName][probNum]["選択肢2"],
+         "choice3":problems[subName][probNum]["選択肢3"],
+         "choice4":problems[subName][probNum]["選択肢4"],
          "finsh":"false"
       }
    except IndexError:
@@ -415,7 +415,7 @@ data = [
          ]
 """
 @app.route(URL_result)
-def setResult():
+def setResult(subName):
    sessionID = request.cookies.get(Session.sessionID,None)
    try:
       resultData = recordDict[sessionID].getStatistics()
@@ -428,7 +428,7 @@ def setResult():
       htmlResultTable = ""
       for i in range(recordDict[sessionID].totalAnswers):
          probNum = recordDict[sessionID].problemNumberList[i]
-         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = problems[probNum]["問題"]) + tdTagTmp.format(rdText = problems[probNum]["選択肢" + str(recordDict[sessionID].answers[i]+1)]) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
+         htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = problems[subName][probNum]["問題"]) + tdTagTmp.format(rdText = problems[subName][probNum]["選択肢" + str(recordDict[sessionID].answers[i]+1)]) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
       with open(resultSourcePath,'r',encoding="utf-8_sig") as htso:
          htmlSource = htso.read().format(
             sID = sessionID,
@@ -438,7 +438,7 @@ def setResult():
             corrRate = str(float(resultData[3])*100)[:5] + "%",
             wrongRate = str(float(resultData[4])*100)[:5] + "%",
             resultTable = resultHtmlTmp.format(trText = htmlResultTable),
-            subName=subjectName,
+            subName=subName,
             dom= "localhost" if isLocalhost else serverAddress
             )
       return htmlSource
@@ -451,7 +451,7 @@ def setResult():
 
 #問題一覧表示用
 @app.route(URL_ProblemList)
-def getProblemList():
+def getProblemList(subName=None):
    resultHtmlTmp = "\
    <tr>\n\
       {trText}\n\
@@ -459,7 +459,7 @@ def getProblemList():
    "
    tdTagTmp = "<td>{rdText}</td>\n"
    htmlResultTable = ""
-   for p in problems:
+   for p in problems[subName]:
       htmlResultTable += resultHtmlTmp.format(trText = \
          tdTagTmp.format(rdText = p["番号"])  + \
          tdTagTmp.format(rdText = p["問題"])  + \
@@ -468,7 +468,7 @@ def getProblemList():
    with open(problemListHtmlSource,'r',encoding="utf-8_sig") as htso:
       htmlSource = htso.read().format(
          resultTable = resultHtmlTmp.format(trText = htmlResultTable),
-         subName=subjectName
+         subName=subName
          )
    return htmlSource
 

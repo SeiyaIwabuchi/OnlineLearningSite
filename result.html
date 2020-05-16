@@ -20,10 +20,10 @@
           <div id="nav-content">
             <h5>メニュー</h5>
             <input type="button" class="btn btn-secondary" onclick="location.href='http://{dom}/mainmenu'" value="教科一覧">
-            <input type="button" class="btn btn-secondary" onclick="location.href='/ProblemList.html'" value="問題一覧">
-          	<input type="button" class="btn btn-secondary" onclick="location.href='/'" value="問題に戻る">
-            <input type="button" class="btn btn-secondary" onclick="location.href='/deleteRecord'" value="もう一度解く">
-            <input type="button" class="btn btn-secondary" onclick="location.href='/onlyMistakes'" value="間違った問題だけ">
+            <input type="button" class="btn btn-secondary problemList" value="問題一覧">
+          	<input type="button" class="btn btn-secondary returnToProblem" value="問題に戻る">
+            <input type="button" class="btn btn-secondary playAgain" value="もう一度解く">
+            <input type="button" class="btn btn-secondary playAgainOnlyMistakes" value="間違った問題だけ">
           	<div class="switchArea">
               <input type="checkbox" id="switch1">
               <label for="switch1"><span></span></label>
@@ -56,10 +56,10 @@
           </table>
           <div id="menu">
 	    <div id="sideBySide">
-      	<input type="button" class="btn btn-secondary" onclick="location.href='/ProblemList.html'" value="問題一覧">
-      	<input type="button" class="btn btn-secondary" onclick="location.href='/'" value="問題に戻る">
-        <input type="button" class="btn btn-secondary" onclick="location.href='/deleteRecord'" value="もう一度解く">
-        <input type="button" class="btn btn-secondary" onclick="location.href='/onlyMistakes'" value="間違った問題だけ">
+      	<input type="button" class="btn btn-secondary problemList" value="問題一覧">
+      	<input type="button" class="btn btn-secondary returnToProblem" value="問題に戻る">
+        <input type="button" class="btn btn-secondary playAgain" value="もう一度解く">
+        <input type="button" class="btn btn-secondary playAgainOnlyMistakes" value="間違った問題だけ">
         <input type="button" class="btn btn-secondary" onclick="location.href='http://{dom}/mainmenu'" value="教科一覧">
 	    </div>
 	    <br>
@@ -71,7 +71,7 @@
       </div>
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-      <script></script>
+      <script src="../static/js/result.js"></script>
     </div>
   </body>
 </html>
