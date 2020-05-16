@@ -4,13 +4,13 @@ function init() {
     $(".problemList").click(function(){
         window.location.href = "/" + location.href.split("/")[location.href.split("/").length-2] + "/ProblemList.html";
     });
-    $(".returnToProblem").onclick(function(){
+    $(".returnToProblem").click(function(){
         window.location.href = "/" + location.href.split("/")[location.href.split("/").length-2];
     });
-    $(".playAgain").onclick(function(){
+    $(".playAgain").click(function(){
         window.location.href = "/" + location.href.split("/")[location.href.split("/").length-2] + "/deleteRecord";
     });
-    $(".playAgainOnlyMistakes").onclick(function(){
+    $(".playAgainOnlyMistakes").click(function(){
         window.location.href = "/" + location.href.split("/")[location.href.split("/").length-2] + "/onlyMistakes";
     });
 }

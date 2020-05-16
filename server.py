@@ -136,7 +136,7 @@ URL_mainMenu = URL_root + "mainmenu"
 URL_deleteRecord = URL_root + "<subName>/deleteRecord"
 URL_updateCookie = URL_root + "<subName>/updateCookie"
 URL_problemJsonDownload = URL_root + "problemJsonDownload"
-URL_onlyMistakes = URL_root + "onlyMistakes"
+URL_onlyMistakes = URL_root + "<subName>/onlyMistakes"
 URL_addSubject = URL_root + "addsub"
 
 #HTML Source path
@@ -709,20 +709,21 @@ def reverse_lookup(ip):
 		return False
 
 @app.route(URL_onlyMistakes)
-def onlyMistakes():
+def onlyMistakes(subName=None):
     global recordDict
     sessionID = request.cookies.get(Session.sessionID,None)
     mistakeProb = ""
     tmpProbList = recordDict[str(sessionID)].problemNumberList.copy()
     tmpWrongList = recordDict[str(sessionID)].wrongNumber
-    recordDict[str(sessionID)] = RecordData(shuffle=False)
-    for Num in tmpWrongList:
-        recordDict[str(sessionID)].problemNumberList.append(tmpProbList[Num])
-    #return "間違った問題数:" + str(len(tmpWrongList)) + ",次の問題リスト:" + str(recordDict[str(sessionID)].problemNumberList)
-    if len(recordDict[str(sessionID)].problemNumberList) > 0:
+    if len(tmpWrongList) > 0:
+        recordDict[str(sessionID)] = RecordData(subName,shuffle=False)
+        for Num in tmpWrongList:
+            recordDict[str(sessionID)].problemNumberList.append(tmpProbList[Num])
         return "<script> location.href='/' </script>"
     else:
-        return "<script> alert('間違った問題はありません。'); window.location.href='/deleteRecord'; </script>";
+        return "<script> alert('間違った問題はありません。'); window.location.href = \"/\" + location.href.split(\"/\")[location.href.split(\"/\").length-2] </script>"
+    #return "間違った問題数:" + str(len(tmpWrongList)) + ",次の問題リスト:" + str(recordDict[str(sessionID)].problemNumberList)
+    
 
 if __name__ == '__main__':
    main()
