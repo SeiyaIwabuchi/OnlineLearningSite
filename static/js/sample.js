@@ -101,4 +101,10 @@ function init() {
   $(".getMyResult").click(function() {
     window.location.href = location.href.split("/")[location.href.split("/").length-1] + "/result";
   });
+  $(".deleteRecord").click(function() {
+    window.location.href = location.href.split("/")[location.href.split("/").length-1] + "/deleteRecord";
+  });
+  $(".ProblemList").click(function() {
+    window.location.href = location.href.split("/")[location.href.split("/").length-1] + "/ProblemList.html";
+  });
 }

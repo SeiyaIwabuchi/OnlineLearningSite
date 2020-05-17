@@ -3,9 +3,10 @@ $(window).load(init());
 function init() {
   // POSTでアップロード
   $("#btnUpLoad").click(function() {
+    alert("/" + location.href.split("/")[location.href.split("/").length-3] + "/upProblem");
     var formdata = new FormData($('#my_form').get(0));
     $.ajax({
-      url  : "/upProblem",
+      url  : "/" + location.href.split("/")[location.href.split("/").length-3] + "/upProblem",
       type : "POST",
       data : formdata,
       cache       : false,
@@ -27,4 +28,7 @@ function init() {
       async: false
     });
   });
+  $(".problemJsonDownload").click(function(){
+        window.location.href = "/" + location.href.split("/")[location.href.split("/").length-3] + "/problemJsonDownload";
+    });
 }

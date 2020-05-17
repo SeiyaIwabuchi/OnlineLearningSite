@@ -127,15 +127,15 @@ URL_answerRequest = URL_root + "<subName>/postText"
 URL_nextProblem = URL_root + "<subName>/nextPoroblem"
 URL_result = URL_root + "<subName>/result"
 URL_ProblemList = URL_root + "<subName>/ProblemList.html"
-URL_admin = URL_root + "admin.html/<hashedValue>"
-URL_upProblem = URL_root + "upProblem"
-URL_login = URL_root + "login"
+URL_admin = URL_root + "<subName>/admin.html/<hashedValue>"
+URL_upProblem = URL_root + "<subName>/upProblem"
+URL_login = URL_root + "<subName>/login"
 URL_auth = URL_root + "auth"
 URL_deleteAdminURL = URL_root + "deleteAdminURL/<palmt>"
 URL_mainMenu = URL_root + "mainmenu"
 URL_deleteRecord = URL_root + "<subName>/deleteRecord"
 URL_updateCookie = URL_root + "<subName>/updateCookie"
-URL_problemJsonDownload = URL_root + "problemJsonDownload"
+URL_problemJsonDownload = URL_root + "<subName>/problemJsonDownload"
 URL_onlyMistakes = URL_root + "<subName>/onlyMistakes"
 URL_addSubject = URL_root + "addsub"
 
@@ -148,8 +148,8 @@ loginFromHtmlPath = "./auth.html"
 mainMenuHtmlPath = "./mainmanu.html"
 
 #log path
-logPath = "./log/{name}_{subName}.log"
-loginLogPath = "./log/login_{name}_{subName}.log"
+logPath = "./log/{name}.log"
+loginLogPath = "./log/login_{name}.log"
 
 #time
 scanInterval = 60 * 60 #秒指定 定期処理タイマー
@@ -244,7 +244,7 @@ def problemWritingToHtml(problemNum,htmlSource,sessionID,subName):
          )
       return htmlSource
    except IndexError:
-      return "<script> location.href='/result'; </script>"
+      return "<script> location.href='/" + subName + "/result'; </script>"
    
 
 def raidoRes2Number(radioRes):
@@ -474,7 +474,7 @@ def getProblemList(subName=None):
 
 #管理用画面表示
 @app.route(URL_admin)
-def getAdmin(hashedValue=None):
+def getAdmin(hashedValue=None,subName=None):
    loginAvailability = False
    for lsd in list(loginSessionDict.values()):
       if lsd.hashedSerialNumber == hashedValue:
@@ -483,27 +483,26 @@ def getAdmin(hashedValue=None):
       htmlSource = ""
       with open(adminHtmlSource,'r',encoding="utf-8_sig") as htso:
          htmlSource = htso.read()
-      return htmlSource.format(log=adminLog,subName=subjectName)
+      return htmlSource.format(log=adminLog,subName=subName)
    else:
       return "<h1>認証エラー</h1>"
 
 #ファイルアップロードメソッド
 @app.route(URL_upProblem, methods=['POST'])
-def upProblem():
+def upProblem(subName=None):
    the_file = request.files['file_1']
-   the_file.save(problemsFilePath) #自動で上書きされる
-   resultB,msg = loadproblemsFromJson()
-   return the_file.filename + "がアップロードされ、問題の更新が" + "成功" if resultB else "失敗" + "しました。" + msg
-
+   the_file.save(problemsFilePathsDict[subName]) #自動で上書きされる
+   loadproblemsFromJson()
+   return the_file.filename + "がアップロードされ、問題の更新がリロードされました"
 #ログイン認証画面
 @app.route(URL_login)
-def login():
+def login(subName=None):
    sessionID = searchForFree(loginSessionDict)
    loginSessionDict[str(sessionID)] = LoginDataSet(request.remote_addr)
    logList.append(request.remote_addr) #ログイン試行なのか問題を解きに来ただけなのか区別する必要がある。
    htmlSource = ""
    with open(loginFromHtmlPath,mode="r",encoding="utf-8_sig") as htso:
-      htmlSource = htso.read().format(sID=str(sessionID),subName=subjectName)
+      htmlSource = htso.read().format(sID=str(sessionID),subName=subName)
    return htmlSource
 
 #ログインログ用辞書を返すメソッド
@@ -575,7 +574,7 @@ def organize():
       adminLog = logText
       #保存 何もないなら保存しない
       if logText != "":
-         with open(logPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today()),subName=subjectName),mode="w") as l:
+         with open(logPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today())),mode="w") as l:
             l.write(logText)
       #ログイン試行ログの保存
       #何時何分に誰（IP）がログインID＋パスワードでログインを試みたかを残しておく
@@ -594,7 +593,7 @@ def organize():
       #クリア
       loginLogList.clear()
       if loginLogText != "":
-         with open(loginLogPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today()),subName=subjectName),mode="w") as l:
+         with open(loginLogPath.format(name="{0:%Y-%m-%d_%H-%M-%S}".format(datetime.datetime.today())),mode="w") as l:
             l.write(loginLogText)
 
 #ブラウザを閉じるときにアクセスURL辞書から削除する
@@ -699,8 +698,8 @@ def updateCookie(subName=None):
    return "<script> location.href='/" + subName + "' </script>"
 
 @app.route(URL_problemJsonDownload)
-def problemJsonDownload():
-   return send_file(problemsFilePath)
+def problemJsonDownload(subName=None):
+   return send_file(problemsFilePathsDict[subName])
 
 def reverse_lookup(ip):
 	try:
@@ -719,9 +718,9 @@ def onlyMistakes(subName=None):
         recordDict[str(sessionID)] = RecordData(subName,shuffle=False)
         for Num in tmpWrongList:
             recordDict[str(sessionID)].problemNumberList.append(tmpProbList[Num])
-        return "<script> location.href='/' </script>"
+        return "<script> window.location.href = \"/\" + location.href.split(\"/\")[location.href.split(\"/\").length-2] </script>"
     else:
-        return "<script> alert('間違った問題はありません。'); window.location.href = \"/\" + location.href.split(\"/\")[location.href.split(\"/\").length-2] </script>"
+        return "<script> alert('間違った問題はありません。もう一度最初から始めます。'); window.location.href = \"/\" + location.href.split(\"/\")[location.href.split(\"/\").length-2] + \"/deleteRecord\" </script>"
     #return "間違った問題数:" + str(len(tmpWrongList)) + ",次の問題リスト:" + str(recordDict[str(sessionID)].problemNumberList)
     
 
