@@ -26,10 +26,10 @@ subjectMngListTemp = "\
             <input type=\"text\" id=\"{subText}\"></input>\
       </td>\
       <td align=\"right\">\
-            <button onclick=\"location.href='#'\" class=\"btn btn-secondary\" id=\"{subMod}\">変更</button>\
+            <button  class=\"btn btn-secondary mngButton\" id=\"{subMod}\">変更</button>\
       </td>\
       <td align=\"right\">\
-         <button onclick=\"location.href='{URL}'\" class=\"btn btn-secondary\" id=\"{subDel}\">削除</button>\
+         <button class=\"btn btn-secondary mngButton\" id=\"{subDel}\">削除</button>\
       </td>\
    </tr>"
 
@@ -764,7 +764,7 @@ def getMngSubj(hashedValue=None):
       logList.append(request.remote_addr)
       subjectListHtml = ""
       for subName in subjectNameList:
-         subjectListHtml += subjectMngListTemp.format(URL="/" + subName,subName=subName,subText=subName + "text",subMod=subName + "mod",subDel=subName + "del") + "\n"
+         subjectListHtml += subjectMngListTemp.format(subName=subName,subText=subName + "_text",subMod=subName + "_mod",subDel=subName + "_del") + "\n"
       with open(mngSubjHtmlPath,'r',encoding="utf-8_sig") as htso:
          htmlSource = htso.read().format(buttons=subjectListHtml)
       return htmlSource
