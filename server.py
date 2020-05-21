@@ -19,7 +19,19 @@ startedServers = []
 
 #教科一覧のテンプレート
 subjectListTemp = """\t<tr>\n\t<td>{subName}</td>\n\t<td align="right"><button onclick="location.href='{URL}'" class="btn btn-secondary" id="{subName2}">開始</button></td>\n</tr>"""
-
+subjectMngListTemp = "\
+   <tr>\
+      <td>{subName}</td>\
+      <td align=\"right\">\
+            <input type=\"text\" id=\"{subText}\"></input>\
+      </td>\
+      <td align=\"right\">\
+            <button onclick=\"location.href='#'\" class=\"btn btn-secondary\" id=\"{subMod}\">変更</button>\
+      </td>\
+      <td align=\"right\">\
+         <button onclick=\"location.href='{URL}'\" class=\"btn btn-secondary\" id=\"{subDel}\">削除</button>\
+      </td>\
+   </tr>"
 
 #serverDmain
 serverAddress = "iwabuchi.ddns.net"
@@ -127,9 +139,9 @@ URL_answerRequest = URL_root + "<subName>/postText"
 URL_nextProblem = URL_root + "<subName>/nextPoroblem"
 URL_result = URL_root + "<subName>/result"
 URL_ProblemList = URL_root + "<subName>/ProblemList.html"
-URL_admin = URL_root + "<subName>/admin.html/<hashedValue>"
+URL_admin = URL_root + "adminTop/<hashedValue>"
 URL_upProblem = URL_root + "<subName>/upProblem"
-URL_login = URL_root + "<subName>/login"
+URL_login = URL_root + "/login"
 URL_auth = URL_root + "auth"
 URL_deleteAdminURL = URL_root + "deleteAdminURL/<palmt>"
 URL_mainMenu = URL_root + "mainmenu"
@@ -138,14 +150,16 @@ URL_updateCookie = URL_root + "<subName>/updateCookie"
 URL_problemJsonDownload = URL_root + "<subName>/problemJsonDownload"
 URL_onlyMistakes = URL_root + "<subName>/onlyMistakes"
 URL_addSubject = URL_root + "addsub"
+URL_manageSubject = URL_root + "mngSubject/<hashedValue>"
 
 #HTML Source path
 htmlSourcePath = "./index.html"
 resultSourcePath = "./result.html"
 problemListHtmlSource = "./ProblemList.html"
-adminHtmlSource = "./admin.html"
+adminHtmlSource = "./mngTop.html"
 loginFromHtmlPath = "./auth.html"
 mainMenuHtmlPath = "./mainmanu.html"
+mngSubjHtmlPath = "./mngSubj.html"
 
 #log path
 logPath = "./log/{name}.log"
@@ -496,13 +510,13 @@ def upProblem(subName=None):
    return the_file.filename + "がアップロードされ、問題の更新がリロードされました"
 #ログイン認証画面
 @app.route(URL_login)
-def login(subName=None):
+def login():
    sessionID = searchForFree(loginSessionDict)
    loginSessionDict[str(sessionID)] = LoginDataSet(request.remote_addr)
    logList.append(request.remote_addr) #ログイン試行なのか問題を解きに来ただけなのか区別する必要がある。
    htmlSource = ""
    with open(loginFromHtmlPath,mode="r",encoding="utf-8_sig") as htso:
-      htmlSource = htso.read().format(sID=str(sessionID),subName=subName)
+      htmlSource = htso.read().format(sID=str(sessionID),subName=None)
    return htmlSource
 
 #ログインログ用辞書を返すメソッド
@@ -524,19 +538,29 @@ def auth():
       loginSessionDict[request.json["sessionID"]].loginAvailability = True
       loginSessionDict[request.json["sessionID"]].hashedSerialNumber = hashlib.sha256(str(serialNumber).encode()).hexdigest()
       serialNumber += 1
-      retJson["adminURL"] = "/admin.html/" + loginSessionDict[request.json["sessionID"]].hashedSerialNumber
+      retJson["adminURL"] = "/adminTop/" + loginSessionDict[request.json["sessionID"]].hashedSerialNumber
    else:
       print("ログイン失敗")
       retJson["Result"] = "False"
       retJson["adminURL"] = ""
    print(retJson)
-   loginLogList.append(createLoginLogDict(
-      datetime.datetime.now(),\
-      dTi[request.remote_addr] if dTi[request.remote_addr] != False else request.remote_addr,\
-      request.json["loginID"],\
-      request.json["pass"],\
-      False if retJson["Result"] == "False" else True,\
-      retJson["adminURL"][11:]\
+   try:
+      loginLogList.append(createLoginLogDict(
+         datetime.datetime.now(),\
+         dTi[request.remote_addr] if dTi[request.remote_addr] != False else request.remote_addr,\
+         request.json["loginID"],\
+         request.json["pass"],\
+         False if retJson["Result"] == "False" else True,\
+         retJson["adminURL"][11:]\
+      ))
+   except KeyError:
+      loginLogList.append(createLoginLogDict(
+         datetime.datetime.now(),\
+          request.remote_addr,\
+         request.json["loginID"],\
+         request.json["pass"],\
+         False if retJson["Result"] == "False" else True,\
+         retJson["adminURL"][11:]\
       ))
    return jsonify(ResultSet=json.dumps(retJson))
 
@@ -723,6 +747,29 @@ def onlyMistakes(subName=None):
         return "<script> alert('間違った問題はありません。もう一度最初から始めます。'); window.location.href = \"/\" + location.href.split(\"/\")[location.href.split(\"/\").length-2] + \"/deleteRecord\" </script>"
     #return "間違った問題数:" + str(len(tmpWrongList)) + ",次の問題リスト:" + str(recordDict[str(sessionID)].problemNumberList)
     
+#教科管理画面
+@app.route(URL_manageSubject)
+def getMngSubj(hashedValue=None):
+   loginAvailability = False
+   for lsd in list(loginSessionDict.values()):
+      if lsd.hashedSerialNumber == hashedValue:
+         loginAvailability = True
+   if loginAvailability:
+      #IPアドレスの関係
+      if not (request.remote_addr in dTi.keys()):
+         dTi[request.remote_addr] = reverse_lookup(request.remote_addr)
+      print("Access from : ",end="")
+      print(dTi[request.remote_addr] if dTi[request.remote_addr] != False else request.remote_addr)
+      #ログ
+      logList.append(request.remote_addr)
+      subjectListHtml = ""
+      for subName in subjectNameList:
+         subjectListHtml += subjectMngListTemp.format(URL="/" + subName,subName=subName,subText=subName + "text",subMod=subName + "mod",subDel=subName + "del") + "\n"
+      with open(mngSubjHtmlPath,'r',encoding="utf-8_sig") as htso:
+         htmlSource = htso.read().format(buttons=subjectListHtml)
+      return htmlSource
+   else:
+      return "<h1>認証エラー</h1>"
 
 if __name__ == '__main__':
    main()

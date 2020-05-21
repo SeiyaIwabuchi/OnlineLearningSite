@@ -43,13 +43,12 @@
 	#menu ul {
 	  list-style: none;
 	}
-	#secondLine {
+	#buttons{
 		display: flex;
-		justify-content: space-between;
+		justify-content: center;
 	}
-	#loginButton{
-		height: 80%;
-		margin-top: 10px;
+	button{
+		margin: 10px;
 	}
   }
   @media screen and (max-width: 479px) { /*ウィンドウ幅が767px以上の場合に適用*/

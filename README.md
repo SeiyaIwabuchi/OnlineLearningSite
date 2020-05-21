@@ -64,3 +64,18 @@ subjectListはjson形式で   教科名:URLで記述する
 
 テキストデータで判定もできるようにもしたい。その問題がラジオボタンで答える問題かテキストで答える問題かを識別して処理 を分ける必要がある。ユーザーによっては同じ意味の文字列でもコンピュータとしては別の文字列となるときがあるので認識の差 をどうにかして吸収したい。たとえばスペースは正規表現で吸収できる。半角全角の差は全角<->半角の相互変換で対応できそう。
 "
+``` python
+subjectMngListTemp = "\
+   <tr>\
+      <td>{subName}</td>\
+      <td align=\"right\">\
+            <input type=\"text\" id=\"{subText}\"></input>\
+      </td>\
+      <td align=\"right\">\
+            <button onclick=\"location.href='#'\" class=\"btn btn-secondary\" id=\"{subMod}\">変更</button>\
+      </td>\
+      <td align=\"right\">\
+         <button onclick=\"location.href='{URL}'\" class=\"btn btn-secondary\" id=\"{subDel}\">削除</button>\
+      </td>\
+   </tr>"
+```

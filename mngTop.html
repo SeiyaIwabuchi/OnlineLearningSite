@@ -6,9 +6,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
     <title>オンライン学習</title>
     <!-- Bootstrap CDN -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="../static/css/result.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 
+    <link rel="stylesheet" href="../static/css/mngTop.css">
     <link rel="shortcut icon" href="../static/images/favicon.ico">
   </head>
   <body>
@@ -18,24 +19,19 @@
       </div>
       <div id="main">
         <div id="container-fluid">
-          <div id="secondLine">
-            <h1>教科一覧</h1>
-            <button type="button" class="btn btn-secondary" id="loginButton" onclick="window.location='/login'">管理</button>
+          <h2>管理トップ</h2>
+          <div id="buttons">
+            <button id="subject" class="btn btn-secondary">教科管理</button>
+            <button id="problem" class="btn btn-secondary">問題管理</button>
+            <button id="analyze" class="btn btn-secondary">統計情報</button>
           </div>
-            <table class="table table-striped">
-		    <tr>
-			    <td>教科名</td>
-			    <td align="right">開始</td>
-		    <tr>
-		    {buttons}
-	    </table>
         </div>
       </div>
       <div id="footer">
       </div>
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-      <script src="../static/js/mainmenu.js"></script>
+      <script src="../static/js/mngTop.js"></script>
     </div>
   </body>
 </html>
