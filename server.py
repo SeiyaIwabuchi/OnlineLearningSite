@@ -274,6 +274,8 @@ def problemWritingToHtml(problemNum,htmlSource,sessionID,subName):
       return htmlSource
    except IndexError:
       return "<script> location.href='/" + subName + "/result'; </script>"
+   except KeyError:
+      return "<script> alert(\"指定されたページまたは教科は存在しません。\"); location.href=\"/\"</script>"
    
 
 def raidoRes2Number(radioRes):
