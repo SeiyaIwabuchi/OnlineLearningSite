@@ -32,6 +32,18 @@ subjectMngListTemp = "\
          <button class=\"btn btn-secondary mngButton\" id=\"{subDel}\">削除</button>\
       </td>\
    </tr>"
+#問題編集用テンプレ
+problemPullDownTemp = "<option value=\"{subName}\">{subName}</option>"
+problemMngListTemp = "\
+   <tr>\
+      <td>{prob}</td>\
+      <td>\
+            <button  class=\"btn btn-secondary mngButton\" id=\"{probMod}\">変更</button>\
+      </td>\
+      <td>\
+         <button class=\"btn btn-secondary mngButton\" id=\"{probDel}\">削除</button>\
+      </td>\
+   </tr>"
 
 #serverDmain
 serverAddress = "iwabuchi.ddns.net"
@@ -151,6 +163,8 @@ URL_problemJsonDownload = URL_root + "<subName>/problemJsonDownload"
 URL_onlyMistakes = URL_root + "<subName>/onlyMistakes"
 URL_addSubject = URL_root + "addsub"
 URL_manageSubject = URL_root + "mngSubject/<hashedValue>"
+URL_manageProblem = URL_root + "mngProblem/<hashedValue>/<subName>"
+
 
 #HTML Source path
 htmlSourcePath = "./index.html"
@@ -160,6 +174,7 @@ adminHtmlSource = "./mngTop.html"
 loginFromHtmlPath = "./auth.html"
 mainMenuHtmlPath = "./mainmanu.html"
 mngSubjHtmlPath = "./mngSubj.html"
+mngProblemjHtmlPath = "./mngProblem.html"
 
 #log path
 logPath = "./log/{name}.log"
@@ -767,6 +782,37 @@ def getMngSubj(hashedValue=None):
          subjectListHtml += subjectMngListTemp.format(subName=subName,subText=subName + "_text",subMod=subName + "_mod",subDel=subName + "_del") + "\n"
       with open(mngSubjHtmlPath,'r',encoding="utf-8_sig") as htso:
          htmlSource = htso.read().format(buttons=subjectListHtml)
+      return htmlSource
+   else:
+      return "<h1>認証エラー</h1>"
+
+#問題管理画面
+@app.route(URL_manageProblem)
+def getMngProblem(hashedValue=None,subName=None):
+   loginAvailability = False
+   for lsd in list(loginSessionDict.values()):
+      if lsd.hashedSerialNumber == hashedValue:
+         loginAvailability = True
+   if loginAvailability:
+      #IPアドレスの関係
+      if not (request.remote_addr in dTi.keys()):
+         dTi[request.remote_addr] = reverse_lookup(request.remote_addr)
+      print("Access from : ",end="")
+      print(dTi[request.remote_addr] if dTi[request.remote_addr] != False else request.remote_addr)
+      #ログ
+      logList.append(request.remote_addr)
+      subjectListHtml = ""
+      problemListHtml = ""
+      subjectListHtml += problemPullDownTemp.format(subName="") + "\n"
+      for sn in subjectNameList:
+         subjectListHtml += problemPullDownTemp.format(subName=sn) + "\n"
+      if subName != "None":
+         for prob in problems[subName]:   
+            problemListHtml += problemMngListTemp.format(prob=prob["問題"],probMod=prob["問題"] + "_mod",probDel=prob["問題"] + "_del")
+      else:
+         problemListHtml += problemMngListTemp.format(prob="教科を上のプルダウンから選択してください",probMod="",probDel="")
+      with open(mngProblemjHtmlPath,'r',encoding="utf-8_sig") as htso:
+         htmlSource = htso.read().format(opt=subjectListHtml,buttons=problemListHtml)
       return htmlSource
    else:
       return "<h1>認証エラー</h1>"

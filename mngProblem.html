@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"></meta>
+    <meta charset="utf-8"></meta>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+    <title>オンライン学習</title>
+    <!-- Bootstrap CDN -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+
+    <link rel="stylesheet" href="../../static/css/mngProblem.css">
+    <link rel="shortcut icon" href="../../static/images/favicon.ico">
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="header">
+          <img src="../../static/images/オンライン学習ヘッダ.jpg"
+      </div>
+      <div id="main">
+        <div id="container-fluid">
+            <div id="secondLine">
+                <h1>問題管理</h1>
+                <select name="教科" class="loginButton" id="subSelecter">
+                    {opt}
+                </select>
+                <button id="add" class="btn btn-secondary loginButton">追加</button>
+            </div>
+            <table class="table table-striped">
+                <tr>
+                  <td>問題</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                {buttons}
+            </table>
+          </div>
+        </div>
+      </div>
+      <div id="footer">
+      </div>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+      <script src="../../static/js/mngProblem.js"></script>
+    </div>
+  </body>
+</html>

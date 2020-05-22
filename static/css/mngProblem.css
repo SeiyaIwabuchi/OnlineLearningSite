@@ -1,0 +1,91 @@
+* {
+	margin: 0;
+	padding: 0; /* 全てのプロパティの余白とパディングをリセットしています。*/
+  }
+  #center{
+	text-align: center;
+	text-decoration: underline;
+  }
+  #box{
+	border: 1px solid #aaa;
+	background-color: bisque;
+	padding:1%;
+  }
+  @media screen and (min-width: 767px) { /*ウィンドウ幅が767px以上の場合に適用*/
+	#wrapper {
+	  width: 700px;
+	  margin: auto;/* 幅固定（700px）でセンタリングします。*/
+	}
+	#header {
+	  width: 600px;
+	  height: 50px;  /* サイトロゴの高さに合わせて調節して下さい。*/
+	}
+	#main {
+	  width: 700px;     /* メニューとコンテンツを囲んでいます。 */
+	  overflow: hidden; /* 親ボックスでフロート解除します。*/
+  
+	}
+	#menu {
+	  text-align:center;
+  	  display: flex;
+  	  flex-direction: column;
+	  width: auto;     /* floatの width 指定は必須です。*/
+	}
+	#contents {
+	  float: right;
+	  width: 550px;     /* floatの width 指定は必須です。*/
+	}
+	#footer {
+	  clear: both;      /* IE6 以前の float 解除対応です。 */
+	  width: 700px;
+	  height: 50px;
+	}
+	#menu ul {
+	  list-style: none;
+	}
+	#secondLine {
+		display: flex;
+		justify-content: space-between;
+	}
+	.loginButton{
+		height: 90%;
+		margin-top: 25px;
+    }
+  }
+  @media screen and (max-width: 479px) { /*ウィンドウ幅が767px以上の場合に適用*/
+	#wrapper {
+	  width: auto;
+	  margin: 4%;/* 幅固定（700px）でセンタリングします。*/
+	}
+	#header {
+	  width: auto;
+	  height: auto;  /* サイトロゴの高さに合わせて調節して下さい。*/
+	}
+	#main {
+	  width: auto;     /* メニューとコンテンツを囲んでいます。 */
+	  overflow: hidden; /* 親ボックスでフロート解除します。*/
+	}
+	#menu {
+	  text-align:center;
+  	  display: flex;
+  	  flex-direction: column;
+	  width: auto;     /* floatの width 指定は必須です。*/
+	}
+	#contents {
+	  float: right;
+	  width: auto;     /* floatの width 指定は必須です。*/
+	}
+	#footer {
+	  clear: both;      /* IE6 以前の float 解除対応です。 */
+	  width: auto;
+	  height: auto;
+	}
+	#menu ul {
+	  list-style: none;
+	}
+	img{
+	  width:100%;
+	  max-width:100%;
+	  height:auto;
+	}
+  }
