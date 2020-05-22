@@ -543,8 +543,8 @@ def createLoginLogDict(date,IPaddr,loginID,passwd,available,hashedSerial):
 def auth():
    global serialNumber
    global loginLogList
-   loginID = "seiya"
-   passwd = "nN49KOMDK"
+   loginID = "0af7aa0126b5ac4a701c0088a4acdb21b478c2ed1560349656758001575542f0"
+   passwd = "ff0c4171b80ea5297040caf898228b6e7e7fc6002caf1dd932de99b036f6f0c3"
    retJson = {}
    print(request.json)
    if request.json["loginID"] == loginID and request.json["pass"] == passwd:

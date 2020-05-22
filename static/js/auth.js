@@ -4,11 +4,16 @@ function init() {
   // ログイン認証
   var loginNum = 0;
   $("#bt_login").click(function() {
+    const shaObj = new jsSHA("SHA-256", "TEXT");
+    shaObj.update($("#ID").val());
+    const hashedID = shaObj.getHash("HEX");
+    shaObj.update($("#passwd").val());
+    const hashedPW = shaObj.getHash("HEX");
     loginNum++;
     if(loginNum <= 3){
       var authData = JSON.stringify({
-          "loginID":$("#ID").val(),
-          "pass":$("#passwd").val(),
+          "loginID":hashedID,
+          "pass":hashedPW,
           "sessionID":$("#sessionID").text()
         });
       $.ajax({
