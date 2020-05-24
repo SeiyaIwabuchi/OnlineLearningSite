@@ -229,7 +229,7 @@ def loadproblemsFromJson():
    global startedServers
    for subName in subjectNameList:
       try:
-         with open(problemsFilePathsDict[subName],"r",encoding="utf-8_sig") as prob:
+         with open(problemsFilePathsDict[subName],"r",encoding="utf-8-sig") as prob:
             problems[subName] = json.load(prob)
          checkProblems(subName)
          print("{}:問題に問題はありませんでした。".format(subName))
@@ -240,7 +240,7 @@ def loadproblemsFromJson():
          print("{}:問題に問題がありました。".format(subName),file=sys.stderr)
       except FileNotFoundError:
          print("{sn}:問題ファイル:{probName}がありませんでした。ファイルを作成します。".format(sn=subName,probName=problemsFilePathsDict[subName],file=sys.stderr))
-         with open(problemsFilePathsDict[subName],mode="w",encoding="utf-8_sig") as probJson:
+         with open(problemsFilePathsDict[subName],mode="w",encoding="utf-8-sig") as probJson:
             probJson.write("""[{"番号":"1","問題":"問題ファイルを更新してください","選択肢1":"管理者に連絡する","選択肢2":"自分で更新する","選択肢3":"サーバーをぶっ壊す","選択肢4":"寝る","正答":"3","解説":"回答しても何も起きませんよ。"}]""")
 
 #jsonデータのチェック
@@ -304,7 +304,7 @@ def getMainMenu():
    for subName in subjectNameList:
       subjectListHtml += subjectListTemp.format(URL="/" + subName,subName=subName,subName2=subName) + "\n"
    subjectListHtml += subjectListTemp.format(URL=URL_addSubject,subName="教科更新",subName2=subName) + "\n"
-   with open(mainMenuHtmlPath,'r',encoding="utf-8_sig") as htso:
+   with open(mainMenuHtmlPath,'r',encoding="utf-8-sig") as htso:
       htmlSource = htso.read().format(buttons=subjectListHtml)
    return htmlSource
 
@@ -367,7 +367,7 @@ def index(subName=None):
    probNum = recordDict[str(sessionID)].problemNumberList[recordDict[str(sessionID)].totalAnswers]
 
    #クライアントへの返答
-   with open(htmlSourcePath,'r',encoding="utf-8_sig") as htso:
+   with open(htmlSourcePath,'r',encoding="utf-8-sig") as htso:
       htmlSource = htso.read()
       htmlSource = problemWritingToHtml(probNum,htmlSource,sessionID,subName)
       response = make_response(htmlSource)
@@ -460,7 +460,7 @@ def setResult(subName):
       for i in range(recordDict[sessionID].totalAnswers):
          probNum = recordDict[sessionID].problemNumberList[i]
          htmlResultTable += resultHtmlTmp.format(trText = tdTagTmp.format(rdText = problems[subName][probNum]["問題"]) + tdTagTmp.format(rdText = problems[subName][probNum]["選択肢" + str(recordDict[sessionID].answers[i]+1)]) + tdTagTmp.format(rdText = "○" if recordDict[sessionID].getRorW(i) == True else "×"))
-      with open(resultSourcePath,'r',encoding="utf-8_sig") as htso:
+      with open(resultSourcePath,'r',encoding="utf-8-sig") as htso:
          htmlSource = htso.read().format(
             sID = sessionID,
             probNum = resultData[0],
@@ -496,7 +496,7 @@ def getProblemList(subName=None):
          tdTagTmp.format(rdText = p["問題"])  + \
          tdTagTmp.format(rdText = p["選択肢" + p["正答"]]) \
       )
-   with open(problemListHtmlSource,'r',encoding="utf-8_sig") as htso:
+   with open(problemListHtmlSource,'r',encoding="utf-8-sig") as htso:
       htmlSource = htso.read().format(
          resultTable = resultHtmlTmp.format(trText = htmlResultTable),
          subName=subName
@@ -512,7 +512,7 @@ def getAdmin(hashedValue=None,subName=None):
          loginAvailability = True
    if loginAvailability:
       htmlSource = ""
-      with open(adminHtmlSource,'r',encoding="utf-8_sig") as htso:
+      with open(adminHtmlSource,'r',encoding="utf-8-sig") as htso:
          htmlSource = htso.read()
       return htmlSource.format(log=adminLog,subName=subName)
    else:
@@ -532,7 +532,7 @@ def login():
    loginSessionDict[str(sessionID)] = LoginDataSet(request.remote_addr)
    logList.append(request.remote_addr) #ログイン試行なのか問題を解きに来ただけなのか区別する必要がある。
    htmlSource = ""
-   with open(loginFromHtmlPath,mode="r",encoding="utf-8_sig") as htso:
+   with open(loginFromHtmlPath,mode="r",encoding="utf-8-sig") as htso:
       htmlSource = htso.read().format(sID=str(sessionID),subName=None)
    return htmlSource
 
@@ -660,13 +660,13 @@ def searchForFree(dic):
 def loadSubjects():
    global subjectNameList
    try:
-      with open(subjectNameListPath,"r",encoding="utf-8") as snlp:
+      with open(subjectNameListPath,"r",encoding="utf-8-sig") as snlp:
          subjectNameList = json.load(snlp)
    except FileNotFoundError:
       print("subjectList.jsonが見つかりません。作成します。")
-      with open(subjectNameListPath,"w",encoding="utf-8") as snlp:
+      with open(subjectNameListPath,"w",encoding="utf-8-sig") as snlp:
          snlp.write("[]")
-      with open(subjectNameListPath,"r",encoding="utf-8") as snlp:
+      with open(subjectNameListPath,"r",encoding="utf-8-sig") as snlp:
          subjectNameList = json.load(snlp)
 
 def main():
@@ -782,7 +782,7 @@ def getMngSubj(hashedValue=None):
       subjectListHtml = ""
       for subName in subjectNameList:
          subjectListHtml += subjectMngListTemp.format(subName=subName,subText=subName + "_text",subMod=subName + "_mod",subDel=subName + "_del") + "\n"
-      with open(mngSubjHtmlPath,'r',encoding="utf-8_sig") as htso:
+      with open(mngSubjHtmlPath,'r',encoding="utf-8-sig") as htso:
          htmlSource = htso.read().format(buttons=subjectListHtml)
       return htmlSource
    else:
@@ -813,7 +813,7 @@ def getMngProblem(hashedValue=None,subName=None):
             problemListHtml += problemMngListTemp.format(prob=prob["問題"],probMod=prob["問題"] + "_mod",probDel=prob["問題"] + "_del")
       else:
          problemListHtml += problemMngListTemp.format(prob="教科を上のプルダウンから選択してください",probMod="",probDel="")
-      with open(mngProblemjHtmlPath,'r',encoding="utf-8_sig") as htso:
+      with open(mngProblemjHtmlPath,'r',encoding="utf-8-sig") as htso:
          htmlSource = htso.read().format(opt=subjectListHtml,buttons=problemListHtml)
       return htmlSource
    else:
