@@ -161,9 +161,9 @@ URL_deleteRecord = URL_root + "<subName>/deleteRecord"
 URL_updateCookie = URL_root + "<subName>/updateCookie"
 URL_problemJsonDownload = URL_root + "<subName>/problemJsonDownload"
 URL_onlyMistakes = URL_root + "<subName>/onlyMistakes"
-URL_addSubject = URL_root + "addsub"
 URL_manageSubject = URL_root + "mngSubject/<hashedValue>"
 URL_manageProblem = URL_root + "mngProblem/<hashedValue>/<subName>"
+URL_addSubject = URL_root + "mngSubject/<hashedValue>/addSubj/<subName>"
 
 
 #HTML Source path
@@ -242,6 +242,7 @@ def loadproblemsFromJson():
          print("{sn}:問題ファイル:{probName}がありませんでした。ファイルを作成します。".format(sn=subName,probName=problemsFilePathsDict[subName],file=sys.stderr))
          with open(problemsFilePathsDict[subName],mode="w",encoding="utf-8-sig") as probJson:
             probJson.write("""[{"番号":"1","問題":"問題ファイルを更新してください","選択肢1":"管理者に連絡する","選択肢2":"自分で更新する","選択肢3":"サーバーをぶっ壊す","選択肢4":"寝る","正答":"3","解説":"回答しても何も起きませんよ。"}]""")
+         loadproblemsFromJson()
 
 #jsonデータのチェック
 def checkProblems(subName):
@@ -303,7 +304,6 @@ def getMainMenu():
    subjectListHtml = ""
    for subName in subjectNameList:
       subjectListHtml += subjectListTemp.format(URL="/" + subName,subName=subName,subName2=subName) + "\n"
-   subjectListHtml += subjectListTemp.format(URL=URL_addSubject,subName="教科更新",subName2=subName) + "\n"
    with open(mainMenuHtmlPath,'r',encoding="utf-8-sig") as htso:
       htmlSource = htso.read().format(buttons=subjectListHtml)
    return htmlSource
@@ -311,26 +311,6 @@ def getMainMenu():
 @app.route("/")
 def redirectToMainmenu():
    return "<script> location.href='/mainmenu'</script>"
-
-#教科追加用メソッド
-@app.route(URL_addSubject)
-def addSubjectByWeb():
-   loadSubjects()
-   for subName in subjectNameList:
-      problemsFilePathsDict[subName] = problemsFilePathTemp.format(subjectName=subName)
-   if loadproblemsFromJson() == -1:
-      loadproblemsFromJson()
-   flg_update = False
-   for subName in subjectNameList:
-      if not subName in startedServers:
-         flg_update = True
-         startedServers.append(subName)
-   if flg_update:
-      print("<h1>教科を更新しました。{subName}を追加</h1>".format(subName=subName))
-      return "<h1>教科を更新しました。{subName}を追加</h1>".format(subName=subName) + """<input type="button" class="btn btn-default" onclick="location.href='/mainmenu'" value="メニューに戻る">"""
-   else:
-      return "<h1>教科の更新はありません。</h1>" + """<input type="button" class="btn btn-default" onclick="location.href='/mainmenu'" value="メニューに戻る">"""
-
 
 @app.route("/<subName>")
 def index(subName=None):
@@ -671,17 +651,14 @@ def loadSubjects():
 
 def main():
    global problemsFilePathsDict
-   global subjectNameList
    global recordDict
    global serialNumber
    global portNum
-   global subjectNameList
    print("サーバー起動")
    loadSubjects()
    for subName in subjectNameList:
       problemsFilePathsDict[subName] = problemsFilePathTemp.format(subjectName=subName)
-   if loadproblemsFromJson() == -1:
-      loadproblemsFromJson()
+   loadproblemsFromJson()
    thread = threading.Thread(target=organize)
    thread.daemon = True
    thread.start()
@@ -816,6 +793,33 @@ def getMngProblem(hashedValue=None,subName=None):
       with open(mngProblemjHtmlPath,'r',encoding="utf-8-sig") as htso:
          htmlSource = htso.read().format(opt=subjectListHtml,buttons=problemListHtml)
       return htmlSource
+   else:
+      return "<h1>認証エラー</h1>"
+
+#教科管理画面の教科追加
+@app.route(URL_addSubject)
+def addSubj(hashedValue=None,subName=None):
+   global subjectNameList
+   loginAvailability = False
+   for lsd in list(loginSessionDict.values()):
+      if lsd.hashedSerialNumber == hashedValue:
+         loginAvailability = True
+   if loginAvailability:
+      #IPアドレスの関係
+      if not (request.remote_addr in dTi.keys()):
+         dTi[request.remote_addr] = reverse_lookup(request.remote_addr)
+      print("Access from : ",end="")
+      print(dTi[request.remote_addr] if dTi[request.remote_addr] != False else request.remote_addr)
+      #ログ
+      logList.append(request.remote_addr)
+      subjectNameList.append(subName)
+      with open(subjectNameListPath,"w",encoding="utf-8-sig") as sf:
+         json.dump(subjectNameList,sf, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+      loadSubjects()
+      for subName in subjectNameList:
+          problemsFilePathsDict[subName] = problemsFilePathTemp.format(subjectName=subName)
+      loadproblemsFromJson()
+      return "<script> window.location.href = \"/mngSubject/{}\"</script>".format(hashedValue)
    else:
       return "<h1>認証エラー</h1>"
 

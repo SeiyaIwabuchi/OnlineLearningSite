@@ -45,11 +45,18 @@
 	}
 	#secondLine {
 		display: flex;
-		justify-content: space-between;
+		justify-content: flex-start;
 	}
 	#loginButton{
 		height: 80%;
 		margin-top: 10px;
+		margin-left: auto;
+	}
+	#subjTextBox{
+		height: 80%;
+		margin-top: 15px;
+		margin-left: auto;
+		margin-right: 10px;
 	}
   }
   @media screen and (max-width: 479px) { /*ウィンドウ幅が767px以上の場合に適用*/
