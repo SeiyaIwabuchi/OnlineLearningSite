@@ -163,7 +163,7 @@ URL_problemJsonDownload = URL_root + "<subName>/problemJsonDownload"
 URL_onlyMistakes = URL_root + "<subName>/onlyMistakes"
 URL_manageSubject = URL_root + "mngSubject/<hashedValue>"
 URL_manageProblem = URL_root + "mngProblem/<hashedValue>/<subName>"
-URL_addSubject = URL_root + "mngSubject/<hashedValue>/addSubj/<subName>"
+URL_editSubject = URL_root + "mngSubject/<hashedValue>/<mode>/<subName>/<aSubName>"
 
 
 #HTML Source path
@@ -269,14 +269,13 @@ def problemWritingToHtml(problemNum,htmlSource,sessionID,subName):
          correct = "",
          sessionID = str(sessionID),
          comment = "",
-         subName=subName,
-         dom= "localhost" if isLocalhost else serverAddress
+         subName=subName
          )
       return htmlSource
    except IndexError:
       return "<script> location.href='/" + subName + "/result'; </script>"
-   except KeyError:
-      return "<script> alert(\"指定されたページまたは教科は存在しません。\"); location.href=\"/\"</script>"
+   #except KeyError:
+   #   return "<script> alert(\"指定されたページまたは教科は存在しません。\"); location.href=\"/\"</script>"
    
 
 def raidoRes2Number(radioRes):
@@ -449,8 +448,7 @@ def setResult(subName):
             corrRate = str(float(resultData[3])*100)[:5] + "%",
             wrongRate = str(float(resultData[4])*100)[:5] + "%",
             resultTable = resultHtmlTmp.format(trText = htmlResultTable),
-            subName=subName,
-            dom= "localhost" if isLocalhost else serverAddress
+            subName=subName
             )
       return htmlSource
    except KeyError:
@@ -797,8 +795,8 @@ def getMngProblem(hashedValue=None,subName=None):
       return "<h1>認証エラー</h1>"
 
 #教科管理画面の教科追加
-@app.route(URL_addSubject)
-def addSubj(hashedValue=None,subName=None):
+@app.route(URL_editSubject)
+def addSubj(hashedValue=None,mode=None,subName=None,aSubName=None):
    global subjectNameList
    loginAvailability = False
    for lsd in list(loginSessionDict.values()):
@@ -812,9 +810,17 @@ def addSubj(hashedValue=None,subName=None):
       print(dTi[request.remote_addr] if dTi[request.remote_addr] != False else request.remote_addr)
       #ログ
       logList.append(request.remote_addr)
-      subjectNameList.append(subName)
+      if mode == "addSubj":
+         subjectNameList.append(subName)
+      elif mode == "delSubj":
+         subjectNameList.remove(subName)
+      elif mode == "modSubj":
+         with open(problemsFilePathTemp.format(subjectName=aSubName),"w",encoding="utf-8-sig") as sf:
+            json.dump(problems[subName],sf, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+         subjectNameList.remove(subName)
+         subjectNameList.append(aSubName)
       with open(subjectNameListPath,"w",encoding="utf-8-sig") as sf:
-         json.dump(subjectNameList,sf, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+            json.dump(subjectNameList,sf, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
       loadSubjects()
       for subName in subjectNameList:
           problemsFilePathsDict[subName] = problemsFilePathTemp.format(subjectName=subName)
