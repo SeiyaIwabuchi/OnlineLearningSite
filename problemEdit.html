@@ -9,51 +9,51 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 
-    <link rel="stylesheet" href="../static/css/problemEdit.css">
-    <link rel="shortcut icon" href="../static/images/favicon.ico">
+    <link rel="stylesheet" href="../../../../static/css/problemEdit.css">
+    <link rel="shortcut icon" href="../../../../static/images/favicon.ico">
   </head>
   <body>
     <div id="wrapper">
       <div id="header">
-          <img src="../static/images/オンライン学習ヘッダ.jpg"
+          <img src="../../../../static/images/オンライン学習ヘッダ.jpg"
       </div>
       <div id="main">
         <div id="container-fluid">
           <h1>問題編集</h1>
             <div id="row1">
-              <h2 id="subTitle1">問題</h2>
+              <h2 id="subTitle1">問題文</h2>
                 <button class="btn btn-secondary fbButtons" id="fButton">前の問題</button>
                 <button class="btn btn-secondary fbButtons" id="bButton">次の問題</button>
             </div>
-            <textarea id="problemText">aaaaaa</textarea>
+            <textarea id="problemText">{problemText}</textarea>
             <h2>選択肢</h2>
             <div class="row2">
               <h3>1,</h3>
-              <textarea class="chooseTextArea">aaaaaa</textarea>
+              <textarea class="chooseTextArea" id="No1">{No1}</textarea>
             </div>
             <div class="row2">
               <h3>2,</h3>
-              <textarea class="chooseTextArea">aaaaaa</textarea>
+              <textarea class="chooseTextArea" id="No2">{No2}</textarea>
             </div>
             <div class="row2">
               <h3>3,</h3>
-              <textarea class="chooseTextArea">aaaaaa</textarea>
+              <textarea class="chooseTextArea" id="No3">{No3}</textarea>
             </div>
             <div class="row2">
               <h3>4,</h3>
-              <textarea class="chooseTextArea">aaaaaa</textarea>
+              <textarea class="chooseTextArea" id="No4">{No4}</textarea>
             </div>
               <div class="row3">
                 <h2>正答 : </h2>
                 <select id="NumberSelecter">
-                  <option value="1">1</option>
-                  <option value="1">2</option>
-                  <option value="1">3</option>
-                  <option value="1">4</option>
+                  <option value="1" {selected1}>1</option>
+                  <option value="2" {selected2}>2</option>
+                  <option value="3" {selected3}>3</option>
+                  <option value="4" {selected4}>4</option>
                 </select>
               </div>
               <h3>解説</h3>
-              <textarea class="comentTextArea">aaaaaa</textarea>
+              <textarea class="comentTextArea">{comentTextArea}</textarea>
               <div class="row4">
                 <button class="btn btn-secondary">キャンセル</button>
                 <button class="btn btn-secondary">続けて作成</button>
@@ -63,11 +63,10 @@
         </div>
       </div>
       <div id="footer">
-        <h6 id="sessionID">{sID}</h6>
       </div>
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-      <script src="../static/js/auth.js"></script>
+      <script src="../../../../static/js/auth.js"></script>
     </div>
   </body>
 </html>

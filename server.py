@@ -36,6 +36,7 @@ subjectMngListTemp = "\
 problemPullDownTemp = "<option value=\"{subName}\">{subName}</option>"
 problemMngListTemp = "\
    <tr>\
+      <td>{no}</td>\
       <td>{prob}</td>\
       <td>\
             <button  class=\"btn btn-secondary mngButton\" id=\"{probMod}\">変更</button>\
@@ -161,10 +162,12 @@ URL_deleteRecord = URL_root + "<subName>/deleteRecord"
 URL_updateCookie = URL_root + "<subName>/updateCookie"
 URL_problemJsonDownload = URL_root + "<subName>/problemJsonDownload"
 URL_onlyMistakes = URL_root + "<subName>/onlyMistakes"
+#教科管理URL
 URL_manageSubject = URL_root + "mngSubject/<hashedValue>"
-URL_manageProblem = URL_root + "mngProblem/<hashedValue>/<subName>"
 URL_editSubject = URL_root + "mngSubject/<hashedValue>/<mode>/<subName>/<aSubName>"
-
+#問題管理URL
+URL_manageProblem = URL_root + "mngProblem/<hashedValue>/<subName>"
+URL_editProblem = URL_root + "mngProblem/<hashedValue>/<subName>/<mode>/<probNo>"
 
 #HTML Source path
 htmlSourcePath = "./index.html"
@@ -175,6 +178,7 @@ loginFromHtmlPath = "./auth.html"
 mainMenuHtmlPath = "./mainmanu.html"
 mngSubjHtmlPath = "./mngSubj.html"
 mngProblemjHtmlPath = "./mngProblem.html"
+mngProblemEditorjHtmlPath = "./problemEdit.html"
 
 #log path
 logPath = "./log/{name}.log"
@@ -781,13 +785,15 @@ def getMngProblem(hashedValue=None,subName=None):
       subjectListHtml = ""
       problemListHtml = ""
       subjectListHtml += problemPullDownTemp.format(subName="") + "\n"
+      idx = 1
       for sn in subjectNameList:
          subjectListHtml += problemPullDownTemp.format(subName=sn) + "\n"
       if subName != "None":
          for prob in problems[subName]:   
-            problemListHtml += problemMngListTemp.format(prob=prob["問題"],probMod=prob["問題"] + "_mod",probDel=prob["問題"] + "_del")
+            problemListHtml += problemMngListTemp.format(no=str(idx),prob=prob["問題"],probMod=str(idx) + "_mod",probDel=str(idx) + "_del")
+            idx += 1
       else:
-         problemListHtml += problemMngListTemp.format(prob="教科を上のプルダウンから選択してください",probMod="",probDel="")
+         problemListHtml += problemMngListTemp.format(no="0",prob="教科を上のプルダウンから選択してください",probMod="",probDel="")
       with open(mngProblemjHtmlPath,'r',encoding="utf-8-sig") as htso:
          htmlSource = htso.read().format(opt=subjectListHtml,buttons=problemListHtml)
       return htmlSource
@@ -826,6 +832,44 @@ def addSubj(hashedValue=None,mode=None,subName=None,aSubName=None):
           problemsFilePathsDict[subName] = problemsFilePathTemp.format(subjectName=subName)
       loadproblemsFromJson()
       return "<script> window.location.href = \"/mngSubject/{}\"</script>".format(hashedValue)
+   else:
+      return "<h1>認証エラー</h1>"
+
+#問題管理
+@app.route(URL_editProblem)
+def editProblem(hashedValue=None,mode=None,subName=None,probNo=None):
+   global subjectNameList
+   loginAvailability = False
+   for lsd in list(loginSessionDict.values()):
+      if lsd.hashedSerialNumber == hashedValue:
+         loginAvailability = True
+   if loginAvailability:
+      #IPアドレスの関係
+      if not (request.remote_addr in dTi.keys()):
+         dTi[request.remote_addr] = reverse_lookup(request.remote_addr)
+      print("Access from : ",end="")
+      print(dTi[request.remote_addr] if dTi[request.remote_addr] != False else request.remote_addr)
+      #ログ
+      logList.append(request.remote_addr)
+      with open(mngProblemEditorjHtmlPath,"r",encoding="utf-8-sig") as f:
+         htmlSource = f.read()
+      if mode == "add":
+         if probNo != "dummy":
+            pass
+         else:
+            htmlSource = htmlSource.format(problemText="",No1="",No2="",No3="",No4="",comentTextArea="",selected1="",selected2="",selected3="",selected4="")
+            return htmlSource
+      elif mode == "del":
+         problems[subName].pop(int(probNo)-1)
+         print(int(probNo)-1)
+      elif mode == "mod":
+         probNo = int(probNo)
+         htmlSource = htmlSource.format(problemText=problems[subName][probNo]["問題"],No1=problems[subName][probNo]["選択肢1"],No2=problems[subName][probNo]["選択肢2"],No3=problems[subName][probNo]["選択肢3"],No4=problems[subName][probNo]["選択肢4"],comentTextArea=problems[subName][probNo]["解説"],selected1="",selected2="",selected3="",selected4="")
+         return htmlSource
+      with open(problemsFilePathsDict[subName],"w",encoding="utf-8-sig") as sf:
+            json.dump(problems[subName],sf, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+      loadproblemsFromJson()
+      return "<script> window.location.href = \"/mngProblem/{}/{}\"</script>".format(hashedValue,subName)
    else:
       return "<h1>認証エラー</h1>"
 
