@@ -169,7 +169,7 @@ URL_editSubject = URL_root + "mngSubject/<hashedValue>/<mode>/<subName>/<aSubNam
 URL_manageProblem = URL_root + "mngProblem/<hashedValue>/<subName>"
 URL_editProblem = URL_root + "mngProblem/<hashedValue>/<subName>/<mode>/<probNo>"
 
-#HTML Source path
+#HTMLソースパス
 htmlSourcePath = "./index.html"
 resultSourcePath = "./result.html"
 problemListHtmlSource = "./ProblemList.html"
