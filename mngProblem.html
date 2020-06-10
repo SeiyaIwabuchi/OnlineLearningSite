@@ -6,8 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
     <title>オンライン学習</title>
     <!-- Bootstrap CDN -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
     <link rel="stylesheet" href="../../static/css/mngProblem.css">
     <link rel="shortcut icon" href="../../static/images/favicon.ico">
@@ -26,11 +25,16 @@
                 </select>
                 <button id="add" class="btn btn-secondary loginButton">追加</button>
             </div>
+            <div id="breadcrumbs">
+              <a href="/">トップページ</a>
+              <p>></p>
+              <a href="javascript:void(0);" onclick="jumpToMngTop();">管理トップページ</a>
+              <p>>教科管理</p>
+            </div>
             <table class="table table-striped">
                 <tr>
                   <td>No</td>
                   <td>問題</td>
-                  <td></td>
                   <td></td>
                 </tr>
                 {buttons}

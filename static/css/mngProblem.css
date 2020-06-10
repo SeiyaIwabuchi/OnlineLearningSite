@@ -46,11 +46,21 @@
 	#secondLine {
 		display: flex;
 		justify-content: space-between;
+		margin: 10px;
 	}
 	.loginButton{
 		height: 90%;
 		margin-top: 25px;
-    }
+	}
+	.ButtonSell{
+		text-align: right;
+	}
+	.mngButton{
+		margin-left: 30px;
+	}
+	#breadcrumbs{
+		display: flex;
+	}
   }
   @media screen and (max-width: 479px) { /*ウィンドウ幅が767px以上の場合に適用*/
 	#wrapper {

@@ -51,10 +51,10 @@ function init() {
           $("#Comment").text(JSON.parse(data.ResultSet).comment);
           $("#ansButton").hide();
         },
-	error:function(XMLHttpRequest, textStatus, errorThrown){
-	    alert("HTT`ステータス:" + XMLHttpRequest.status  + "\nエラー内容:" + textStatus);
-	    location.reload();
-	}
+        error:function(XMLHttpRequest, textStatus, errorThrown){
+            alert("HTT`ステータス:" + XMLHttpRequest.status  + "\nエラー内容:" + textStatus);
+            location.reload();
+        }
       });
     }else{
       alert("必ず回答してください。");

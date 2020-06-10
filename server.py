@@ -38,10 +38,8 @@ problemMngListTemp = "\
    <tr>\
       <td>{no}</td>\
       <td>{prob}</td>\
-      <td>\
-            <button  class=\"btn btn-secondary mngButton\" id=\"{probMod}\">変更</button>\
-      </td>\
-      <td>\
+      <td class=\"ButtonSell\">\
+         <button  class=\"btn btn-secondary mngButton\" id=\"{probMod}\">変更</button>\
          <button class=\"btn btn-secondary mngButton\" id=\"{probDel}\">削除</button>\
       </td>\
    </tr>"
@@ -168,6 +166,8 @@ URL_editSubject = URL_root + "mngSubject/<hashedValue>/<mode>/<subName>/<aSubNam
 #問題管理URL
 URL_manageProblem = URL_root + "mngProblem/<hashedValue>/<subName>"
 URL_editProblem = URL_root + "mngProblem/<hashedValue>/<subName>/<mode>/<probNo>"
+#問題編集URL(POSTのURL)
+URL_editProblemPost = URL_root + "<hashedValue>/posting"
 
 #HTMLソースパス
 htmlSourcePath = "./index.html"
@@ -785,7 +785,7 @@ def getMngProblem(hashedValue=None,subName=None):
       subjectListHtml = ""
       problemListHtml = ""
       subjectListHtml += problemPullDownTemp.format(subName="") + "\n"
-      idx = 1
+      idx = 0
       for sn in subjectNameList:
          subjectListHtml += problemPullDownTemp.format(subName=sn) + "\n"
       if subName != "None":
@@ -860,16 +860,60 @@ def editProblem(hashedValue=None,mode=None,subName=None,probNo=None):
             htmlSource = htmlSource.format(problemText="",No1="",No2="",No3="",No4="",comentTextArea="",selected1="",selected2="",selected3="",selected4="")
             return htmlSource
       elif mode == "del":
-         problems[subName].pop(int(probNo)-1)
-         print(int(probNo)-1)
+         problems[subName].pop(int(probNo))
       elif mode == "mod":
-         probNo = int(probNo)
-         htmlSource = htmlSource.format(problemText=problems[subName][probNo]["問題"],No1=problems[subName][probNo]["選択肢1"],No2=problems[subName][probNo]["選択肢2"],No3=problems[subName][probNo]["選択肢3"],No4=problems[subName][probNo]["選択肢4"],comentTextArea=problems[subName][probNo]["解説"],selected1="",selected2="",selected3="",selected4="")
+         probNo = int(probNo)%len(problems[subName])
+         selectedList = ["" for i in range(4)]
+         selectedList[int(problems[subName][probNo]["正答"])-1] = "selected"
+         htmlSource = htmlSource.format(problemText=problems[subName][probNo]["問題"],No1=problems[subName][probNo]["選択肢1"],No2=problems[subName][probNo]["選択肢2"],No3=problems[subName][probNo]["選択肢3"],No4=problems[subName][probNo]["選択肢4"],comentTextArea=problems[subName][probNo]["解説"],selected1=selectedList[0],selected2=selectedList[1],selected3=selectedList[2],selected4=selectedList[3])
          return htmlSource
       with open(problemsFilePathsDict[subName],"w",encoding="utf-8-sig") as sf:
             json.dump(problems[subName],sf, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
       loadproblemsFromJson()
       return "<script> window.location.href = \"/mngProblem/{}/{}\"</script>".format(hashedValue,subName)
+   else:
+      return "<h1>認証エラー</h1>"
+
+#問題管理
+@app.route(URL_editProblemPost, methods=['POST'])
+def editProblemPost(hashedValue=None):
+   global subjectNameList
+   reciveJson = dict(request.json)
+   loginAvailability = False
+   for lsd in list(loginSessionDict.values()):
+      if lsd.hashedSerialNumber == hashedValue:
+         loginAvailability = True
+   if loginAvailability:
+      #IPアドレスの関係
+      if not (request.remote_addr in dTi.keys()):
+         dTi[request.remote_addr] = reverse_lookup(request.remote_addr)
+      print("Access from : ",end="")
+      print(dTi[request.remote_addr] if dTi[request.remote_addr] != False else request.remote_addr)
+      #ログ
+      logList.append(request.remote_addr)
+      if reciveJson["mode"] == "mod":
+         probNum = int(reciveJson["probNum"])
+         problems[reciveJson["subName"]][probNum]["問題"] = reciveJson["problemStatement"]
+         problems[reciveJson["subName"]][probNum]["正答"] = reciveJson["correctAnswer"]
+         problems[reciveJson["subName"]][probNum]["解説"] = reciveJson["coment"]
+         problems[reciveJson["subName"]][probNum]["選択肢1"] = reciveJson["choise1"]
+         problems[reciveJson["subName"]][probNum]["選択肢2"] = reciveJson["choise2"]
+         problems[reciveJson["subName"]][probNum]["選択肢3"] = reciveJson["choise3"]
+         problems[reciveJson["subName"]][probNum]["選択肢4"] = reciveJson["choise4"]
+      elif reciveJson["mode"] == "add":
+         problems[reciveJson["subName"]].append(dict())
+         probNum = len(problems[reciveJson["subName"]])-1
+         problems[reciveJson["subName"]][probNum]["問題"] = reciveJson["problemStatement"]
+         problems[reciveJson["subName"]][probNum]["正答"] = reciveJson["correctAnswer"]
+         problems[reciveJson["subName"]][probNum]["解説"] = reciveJson["coment"]
+         problems[reciveJson["subName"]][probNum]["選択肢1"] = reciveJson["choise1"]
+         problems[reciveJson["subName"]][probNum]["選択肢2"] = reciveJson["choise2"]
+         problems[reciveJson["subName"]][probNum]["選択肢3"] = reciveJson["choise3"]
+         problems[reciveJson["subName"]][probNum]["選択肢4"] = reciveJson["choise4"]
+      with open(problemsFilePathsDict[reciveJson["subName"]],"w",encoding="utf-8-sig") as sf:
+         json.dump(problems[reciveJson["subName"]],sf, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+      loadproblemsFromJson()
+      return str(probNum)
    else:
       return "<h1>認証エラー</h1>"
 

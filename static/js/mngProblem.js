@@ -32,3 +32,8 @@ function init() {
         window.location.href = "/mngProblem/" + location.href.split("/")[location.href.split("/").length-2] + "/" + location.href.split("/")[location.href.split("/").length-1] + "/" + "mod/" + probNum;
     });
 }
+function jumpToMngTop(){
+    var tmp = location.href.split("/");
+    var accessToken = tmp[tmp.length-2];
+    location.href = "/adminTop/" + accessToken;
+}

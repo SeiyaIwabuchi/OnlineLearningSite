@@ -23,3 +23,8 @@ function init() {
         }
     });
 }
+function jumpToMngTop(){
+    var tmp = location.href.split("/");
+    var accessToken = tmp[tmp.length-1];
+    location.href = "/adminTop/" + accessToken;
+}
