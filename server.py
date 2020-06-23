@@ -152,7 +152,7 @@ URL_result = URL_root + "<subName>/result"
 URL_ProblemList = URL_root + "<subName>/ProblemList.html"
 URL_admin = URL_root + "adminTop/<hashedValue>"
 URL_upProblem = URL_root + "<subName>/upProblem"
-URL_login = URL_root + "/login"
+URL_login = URL_root + "login"
 URL_auth = URL_root + "auth"
 URL_deleteAdminURL = URL_root + "deleteAdminURL/<palmt>"
 URL_mainMenu = URL_root + "mainmenu"
@@ -910,6 +910,7 @@ def editProblemPost(hashedValue=None):
          problems[reciveJson["subName"]][probNum]["選択肢2"] = reciveJson["choise2"]
          problems[reciveJson["subName"]][probNum]["選択肢3"] = reciveJson["choise3"]
          problems[reciveJson["subName"]][probNum]["選択肢4"] = reciveJson["choise4"]
+         problems[reciveJson["subName"]][probNum]["番号"] = str(probNum)
       with open(problemsFilePathsDict[reciveJson["subName"]],"w",encoding="utf-8-sig") as sf:
          json.dump(problems[reciveJson["subName"]],sf, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
       loadproblemsFromJson()
