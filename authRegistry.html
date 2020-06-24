@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"></meta>
+    <meta charset="utf-8"></meta>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+    <title>オンライン学習</title>
+    <!-- Bootstrap CDN -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+
+    <link rel="stylesheet" href="../static/css/result.css">
+    <link rel="shortcut icon" href="../static/images/favicon.ico">
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="header">
+          <img src="../static/images/オンライン学習ヘッダ.jpg"
+      </div>
+      <div id="main">
+        <div id="container-fluid">
+          <h2>認証情報登録</h2>
+          <h3>ログインID</h3>
+          <input type="text" id="ID">
+          <h3>パスワード</h3>
+          <input type="password" id="passwd">
+          <br>
+          <input type="button" id="bt_login" value="ログイン">
+        </div>
+      </div>
+      <div id="footer">
+        <h6 id="sessionID">{sID}</h6>
+      </div>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+      <script type="text/javascript" src="../static/js/jsSHA/dist/sha.js"></script>
+      <script src="../static/js/authRegistry.js"></script>
+    </div>
+  </body>
+</html>

@@ -170,6 +170,9 @@ URL_editProblem = URL_root + "mngProblem/<hashedValue>/<subName>/<mode>/<probNo>
 URL_editProblemPost = URL_root + "<hashedValue>/posting"
 #時間割URL
 URL_zikanwari = "/zikanwari"
+#認証情報登録用URL
+URL_authRegistry = URL_root + "authRegistry"
+URL_showAuthRegistry = URL_root + "showAuthRegistry"
 
 #HTMLソースパス
 htmlSourcePath = "./index.html"
@@ -182,6 +185,7 @@ mngSubjHtmlPath = "./mngSubj.html"
 mngProblemjHtmlPath = "./mngProblem.html"
 mngProblemEditorjHtmlPath = "./problemEdit.html"
 zikanwariHtmlPath = "./zikanwari.html"
+authRegistryHtmlPath = "./authRegistry.html"
 
 #log path
 logPath = "./log/{name}.log"
@@ -200,6 +204,10 @@ subjectNameList = []
 #問題jsonパス
 problemsFilePathTemp = "./problems_{subjectName}.json"
 problemsFilePathsDict = {}
+
+#認証データjsonパス
+authDataJsonPath = "./authData.json"
+authDataDict = {}
 
 #教科リストファイルパス
 subjectNameListPath = "./subjectList.json"
@@ -530,11 +538,9 @@ def createLoginLogDict(date,IPaddr,loginID,passwd,available,hashedSerial):
 def auth():
    global serialNumber
    global loginLogList
-   loginID = "0af7aa0126b5ac4a701c0088a4acdb21b478c2ed1560349656758001575542f0"
-   passwd = "ff0c4171b80ea5297040caf898228b6e7e7fc6002caf1dd932de99b036f6f0c3"
    retJson = {}
    print(request.json)
-   if request.json["loginID"] == loginID and request.json["pass"] == passwd:
+   if request.json["loginID"] in authDataDict.keys() and request.json["pass"] == authDataDict[request.json["loginID"]]:
       print("ログイン成功")
       retJson["Result"] = "True"
       loginSessionDict[request.json["sessionID"]].loginAvailability = True
@@ -661,6 +667,7 @@ def main():
    global portNum
    print("サーバー起動")
    loadSubjects()
+   loadAuthData()
    for subName in subjectNameList:
       problemsFilePathsDict[subName] = problemsFilePathTemp.format(subjectName=subName)
    loadproblemsFromJson()
@@ -924,6 +931,38 @@ def editProblemPost(hashedValue=None):
 @app.route(URL_zikanwari)
 def getZikanwari():
    with open(zikanwariHtmlPath,"r",encoding="utf-8-sig") as f:
+      source = f.read()
+   return source
+
+def loadAuthData():
+   global authDataDict
+   try:
+      with open(authDataJsonPath,"r") as f:
+         authDataDict = json.load(f)
+      print("AuthData:{} records".format(len(authDataDict)))
+   except FileNotFoundError:
+      with open(authDataJsonPath,"w") as f:
+         json.dump({"id":"password"},f)
+
+#認証情報登録
+@app.route(URL_authRegistry,methods=['POST'])
+def authRegistry():
+   global serialNumber
+   global loginLogList
+   global authDataDict
+   retJson = {}
+   print(request.json)
+   request.json["loginID"]
+   #authDataDictに追加する
+   authDataDict[request.json["loginID"]] = request.json["pass"]
+   with open(authDataJsonPath,"w") as adf:
+      json.dump(authDataDict,adf)
+   loadAuthData()
+   return "OK"
+
+@app.route(URL_showAuthRegistry)
+def showAuthRegistry():
+   with open(authRegistryHtmlPath,"r",encoding="utf-8-sig") as f:
       source = f.read()
    return source
 
