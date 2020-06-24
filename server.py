@@ -168,6 +168,8 @@ URL_manageProblem = URL_root + "mngProblem/<hashedValue>/<subName>"
 URL_editProblem = URL_root + "mngProblem/<hashedValue>/<subName>/<mode>/<probNo>"
 #問題編集URL(POSTのURL)
 URL_editProblemPost = URL_root + "<hashedValue>/posting"
+#時間割URL
+URL_zikanwari = "/zikanwari"
 
 #HTMLソースパス
 htmlSourcePath = "./index.html"
@@ -179,6 +181,7 @@ mainMenuHtmlPath = "./mainmanu.html"
 mngSubjHtmlPath = "./mngSubj.html"
 mngProblemjHtmlPath = "./mngProblem.html"
 mngProblemEditorjHtmlPath = "./problemEdit.html"
+zikanwariHtmlPath = "./zikanwari.html"
 
 #log path
 logPath = "./log/{name}.log"
@@ -917,6 +920,12 @@ def editProblemPost(hashedValue=None):
       return str(probNum)
    else:
       return "<h1>認証エラー</h1>"
+
+@app.route(URL_zikanwari)
+def getZikanwari():
+   with open(zikanwariHtmlPath,"r",encoding="utf-8-sig") as f:
+      source = f.read()
+   return source
 
 if __name__ == '__main__':
    main()
