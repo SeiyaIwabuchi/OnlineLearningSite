@@ -872,6 +872,9 @@ def editProblem(hashedValue=None,mode=None,subName=None,probNo=None):
       elif mode == "del":
          problems[subName].pop(int(probNo))
       elif mode == "mod":
+         if probNo == "NaN":
+            probNo = str(len(problems[subName])-1)
+            return "<script>window.location.href="+f"\'{probNo}\'</script>"
          probNo = int(probNo)%len(problems[subName])
          selectedList = ["" for i in range(4)]
          selectedList[int(problems[subName][probNo]["正答"])-1] = "selected"
