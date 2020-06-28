@@ -50,6 +50,7 @@ function init() {
           $("#Correct").text("正答 : " + JSON.parse(data.ResultSet).correct);
           $("#Comment").text(JSON.parse(data.ResultSet).comment);
           $("#ansButton").hide();
+          $("#progress").text(JSON.parse(data.ResultSet).progress);
         },
         error:function(XMLHttpRequest, textStatus, errorThrown){
             alert("HTT`ステータス:" + XMLHttpRequest.status  + "\nエラー内容:" + textStatus);

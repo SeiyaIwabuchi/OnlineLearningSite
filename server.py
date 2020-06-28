@@ -396,7 +396,8 @@ def receiveAnswer(subName=None):
    return_data = {
       "RorW":RorW,
       "correct":problems[subName][oldProbNum]["選択肢" + problems[subName][oldProbNum]["正答"]],
-      "comment":problems[subName][oldProbNum]["解説"] if problems[subName][oldProbNum]["解説"] != "" else "特になし"
+      "comment":problems[subName][oldProbNum]["解説"] if problems[subName][oldProbNum]["解説"] != "" else "特になし",
+      "progress":"{}/{}".format(recordDict[str(sessionID)].totalAnswers,len(problems[subName]))
       }
    return jsonify(ResultSet=json.dumps(return_data))
 
